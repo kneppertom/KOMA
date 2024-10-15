@@ -1,0 +1,63 @@
+<!-- user_list.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Benutzerverwaltung</h2>
+<a href="{% url 'home' %}" class="btn btn-secondary mb-3">Zurück zum Dashboard</a>
+    <form method="POST">
+        {% csrf_token %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Benutzername</th>
+                    <th>Email</th>
+                    <th>Berechtigungen</th>
+                    <th>Neue Berechtigungen hinzufügen</th>
+                    <th>Aktion</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user_data in user_permissions %}
+                <tr>
+                    <td>{{ user_data.user.username }}</td>
+                    <td>{{ user_data.user.email }}</td>
+                    <td>
+                        <ul>
+                            {% for permission in user_data.permissions %}
+                            <li>
+                                <button type="submit" class="btn btn-danger btn-sm" name="remove_permission" value="{{ user_data.user.id }}-{{ permission }}">{{ permission }}</button>
+                            </li>
+                                {% empty %}
+                            <li>Keine Berechtigungen</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                        <td>
+                        <select name="permissions_{{ user_data.user.id }}" multiple class="form-control permissions-dropdown js-example-basic-multiple">
+                            {% for permission in all_permissions %}
+                            <option value="{{ permission.id }}" {% if permission.codename in user_data.permissions %}selected{% endif %}>{{ permission.name }}</option>
+                            {% endfor %}
+                        </select>
+                        </td>
+                    <td>
+                        <button type="submit" class="btn btn-primary" name="save_user" value="{{ user_data.user.id }}">Speichern</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </form>
+</div>
+
+<script>
+    $(document).ready(function() {
+        // Initialisiere Select2 für alle Mehrfachauswahlfelder
+        $('.permissions-dropdown').select2({
+            placeholder: 'Wähle Berechtigungen',
+            allowClear: true,
+            width: '60%'  // Passt die Breite an das umgebende Element an
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Ticket erstellen - KOMA Ticketsystem
+{% endblock %}
+
+{% block content %}
+    <div class="mt-4">
+        <h2>Neues Ticket erstellen</h2>
+        <form method="post" class="mt-4">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label for="title" class="form-label">Titel des Tickets</label>
+                <input type="text" class="form-control" id="title" name="title" required placeholder="Titel des Tickets">
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label">Beschreibung</label>
+                <textarea class="form-control" id="description" name="description" rows="4" required placeholder="Beschreiben Sie das Problem oder die Anfrage"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Ticket erstellen</button>
+<!--            <a href="{% url 'ticket_list' %}" class="btn btn-secondary">Zurück zur Übersicht</a>-->
+        </form>
+    </div>
+{% endblock %}

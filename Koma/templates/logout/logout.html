@@ -1,0 +1,18 @@
+<!-- logout.html -->
+{% extends "base.html" %}
+
+{% block title %}
+    Abmelden - KOMA Ticketsystem
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Abmelden</h2>
+    <p>Möchten Sie sich wirklich abmelden?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Abmelden</button>
+        <a href="{% url 'home' %}" class="btn btn-secondary">Abbrechen</a>
+    </form>
+</div>
+{% endblock %}
