@@ -3,8 +3,11 @@ from django.contrib.auth.models import User
 
 class Ticket(models.Model):
     STATUS_CHOICES = [
-        ('OPEN', 'Offen'),
+        ('Received', 'Eingegangen'),
         ('IN_PROGRESS', 'In Bearbeitung'),
+        ('QUESTION_OPEN', 'Frage offen'),
+        ('QUESTION_ANSWERED', "Frage beantwortet"),
+        ('FORWARDED', 'Weitergeleitet'),
         ('CLOSED', 'Geschlossen'),
     ]
 
