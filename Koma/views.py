@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import permission_required
-from .models import Ticket
+from .models import Ticket, TicketHistory
 from django.contrib.contenttypes.models import ContentType
 from .forms import TicketForm
 from django.shortcuts import render, get_object_or_404, redirect
@@ -124,6 +124,11 @@ from .forms import TicketForm
 def ticket_overview(request):
     tickets = Ticket.objects.all().order_by('-created_at')
     selected_ticket = tickets.first() if tickets.exists() else None
+    history_entries = []  # Standardmäßig leere Liste für den Verlauf
+
+    # Historie des ausgewählten Tickets abrufen, falls ein Ticket ausgewählt ist
+    if selected_ticket:
+        history_entries = TicketHistory.objects.filter(ticket=selected_ticket).order_by('-datetime')
 
     # Formularverarbeitung für ein neues Ticket
     if request.method == 'POST':
@@ -133,11 +138,14 @@ def ticket_overview(request):
             new_ticket.assigned_to = request.user
             new_ticket.created_by = request.user
             new_ticket.save()
-            # TicketHistory.objects.create(
-            #     ticket=new_ticket,
-            #     action_by=request.user,
-            #     action_text="Ticket erstellt"
-            # )
+            # TicketHistory-Eintrag erstellen, wenn ein neues Ticket angelegt wird
+            TicketHistory.objects.create(
+                ticket=new_ticket,
+                text="Ticket erstellt",
+                status=new_ticket.status,
+                datetime=new_ticket.created_at,
+                user=request.user
+            )
             return redirect('ticket_overview')
     else:
         form = TicketForm()
@@ -145,6 +153,7 @@ def ticket_overview(request):
     context = {
         'tickets': tickets,
         'selected_ticket': selected_ticket,
+        'history_entries': history_entries,  # Historie dem Kontext hinzufügen
         'form': form,  # Das Formular für ein neues Ticket
     }
     return render(request, 'tickets/ticket_overview.html', context)
@@ -153,6 +162,19 @@ def ticket_overview(request):
 def get_ticket(request, ticket_id):
     try:
         ticket = Ticket.objects.get(id=ticket_id)
+        history = TicketHistory.objects.filter(ticket=ticket).order_by('-datetime')
+
+        # Erstelle JSON-kompatibles Format für die Historie
+        history_data = [
+            {
+                'datetime': entry.datetime.strftime('%Y-%m-%d %H:%M:%S'),
+                'user': entry.user.username,
+                'text': entry.text,
+                'status': entry.status,
+            }
+            for entry in history
+        ]
+
         data = {
             'id': ticket.id,
             'title': ticket.title,
@@ -162,6 +184,7 @@ def get_ticket(request, ticket_id):
             'inspector': ticket.inspector.username if ticket.inspector else '',
             'description': ticket.description,
             'created_at': ticket.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'history': history_data,
         }
         return JsonResponse(data)
     except Ticket.DoesNotExist:

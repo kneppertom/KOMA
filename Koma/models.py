@@ -32,21 +32,21 @@ class Ticket(models.Model):
             ("can_view_users", "Can view users"),
         ]
 
-# ChangeHistory Modell
-class ChangeHistory(models.Model):
-    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, verbose_name="Ticket", related_name="changes")
-    text_old = models.TextField(verbose_name="Alter Text", null=True, blank=True)
-    text_new = models.TextField(verbose_name="Neuer Text", null=True, blank=True)
-    state_old = models.CharField(max_length=20, choices=Ticket.STATUS_CHOICES, verbose_name="Alter Status", null=True, blank=True)
-    state_new = models.CharField(max_length=20, choices=Ticket.STATUS_CHOICES, verbose_name="Neuer Status", null=True, blank=True)
-    changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name="Geändert von")
-    change_date = models.DateTimeField(auto_now_add=True, verbose_name="Änderungsdatum")
+# TicketHistory Modell, ersetzt ChangeHistory
+class TicketHistory(models.Model):
+    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, verbose_name="Ticket", related_name="history_entries")
+    change_id = models.AutoField(primary_key=True)  # Automatische fortlaufende Nummer
+    text = models.TextField(verbose_name="Text")  # Vom Benutzer hinzugefügter Text
+    status = models.CharField(max_length=20, choices=Ticket.STATUS_CHOICES, verbose_name="Status")  # Referenzstatus
+    datetime = models.DateTimeField(auto_now_add=True, verbose_name="Änderungsdatum")  # Datum und Uhrzeit des Eintrags
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name="Geändert von")  # Benutzer, der den Eintrag erstellt hat
 
     def __str__(self):
-        return f"Änderung für {self.ticket.title} am {self.change_date}"
+        return f"History #{self.change_id} für Ticket {self.ticket.title} - Status: {self.status}"
 
     class Meta:
         app_label = 'Koma'
+        verbose_name_plural = "Ticket Histories"
 
 # Module Modell
 class Module(models.Model):

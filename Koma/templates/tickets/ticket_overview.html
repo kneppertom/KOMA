@@ -19,27 +19,26 @@
         </nav>
     </div>
     <div class="col-md-9">
-        <div id="ticket-detail">
+        <div id="ticket-detail" class="border p-3">
             {% if selected_ticket %}
-                <h4><strong>Ticket #{{ selected_ticket.id }}: {{ selected_ticket.subject }}</strong></h4>
-                <p><strong>Priorität:</strong> {{ selected_ticket.priority }}</p>
-                <p><strong>Status:</strong> {{ selected_ticket.status }}</p>
+                <h4><strong>Ticket #{{ selected_ticket.id }}: {{ selected_ticket.title }}</strong></h4>
+                <p><strong>Priorität:</strong> <span class="badge badge-{{ selected_ticket.priority|lower }}">{{ selected_ticket.priority }}</span></p>
+                <p><strong>Status:</strong> <span class="badge badge-{{ selected_ticket.status|lower }}">{{ selected_ticket.status }}</span></p>
                 <p><strong>Modul:</strong> {{ selected_ticket.module }}</p>
                 <p><strong>Bearbeiter:</strong> {{ selected_ticket.assigned_to }}</p>
                 <p><strong>Meldungstext:</strong> {{ selected_ticket.description }}</p>
-                <p><strong>Meldezeitpunkt:</strong> {{ selected_ticket.created_at }}</p>
-
-<!--                <h5>Historie</h5>-->
-<!--                <ul>-->
-<!--                    {% for history in selected_ticket.history %}-->
-<!--                        <li>{{ history.timestamp }} - {{ history.action_by }}: {{ history.action_text }}</li>-->
-<!--                    {% endfor %}-->
-<!--                </ul>-->
+                <p><strong>Meldezeitpunkt:</strong> {{ selected_ticket.created_at|date:"d.m.Y H:i" }}</p>
+                <h5>Ticket-Historie</h5>
+                <ul>
+                    {% for entry in history_entries %}
+                        <li>{{ entry.datetime|date:"d.m.Y H:i" }} - {{ entry.user }}: {{ entry.text }} (Status: {{ entry.status }})</li>
+                    {% endfor %}
+                </ul>
             {% else %}
                 <p>Bitte wählen Sie ein Ticket aus der Liste.</p>
             {% endif %}
         </div>
-
+        <button id="update-ticket-btn" class="btn btn-primary w-100 mb-3">Ticket bearbeiten</button>
         <!-- Formular für ein neues Ticket -->
         <div id="new-ticket-form" style="display: none;">
             <h4><strong>Neues Ticket</strong></h4>
@@ -77,6 +76,11 @@
                 .then(response => response.json())
                 .then(data => {
                     // Details in der Detailansicht aktualisieren
+                    let historyHtml = '<h5>Ticket-Historie</h5><ul>';
+                    data.history.forEach(entry => {
+                        historyHtml += `<li>${entry.datetime} - ${entry.user}: ${entry.text} (Status: ${entry.status})</li>`;
+                    });
+                    historyHtml += '</ul>';
                     document.querySelector('#ticket-detail').innerHTML = `
                         <h4><strong>Ticket #${data.id}: ${data.title}</strong></h4>
                         <p><strong>Priorität:</strong> ${data.priority}</p>
@@ -85,14 +89,14 @@
                         <p><strong>Bearbeiter:</strong> ${data.inspector || ''}</p>
                         <p><strong>Meldungstext:</strong> ${data.description}</p>
                         <p><strong>Meldezeitpunkt:</strong> ${data.created_at}</p>
+                        ${historyHtml}
                     `;
                 })
                 .catch(error => {
                     console.error('Fehler beim Laden der Ticket-Details:', error);
                 });
+            });
         });
     });
-});
-
 </script>
 {% endblock %}

@@ -1,18 +1,13 @@
 # Koma/admin.py
 
 from django.contrib import admin
-from .models import Ticket, ChangeHistory, Module, ModuleManager, UserProfile, Login
+from .models import Ticket, TicketHistory, Module, ModuleManager, UserProfile, Login
 
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
     list_display = ('title', 'created_by', 'status', 'created_at')
     search_fields = ('title', 'description', 'created_by__username')
     list_filter = ('status', 'priority')
-
-@admin.register(ChangeHistory)
-class ChangeHistoryAdmin(admin.ModelAdmin):
-    list_display = ('ticket', 'changed_by', 'change_date')
-    list_filter = ('change_date',)
 
 @admin.register(Module)
 class ModuleAdmin(admin.ModelAdmin):
@@ -30,3 +25,7 @@ class UserProfileAdmin(admin.ModelAdmin):
 class LoginAdmin(admin.ModelAdmin):
     list_display = ('username', 'user')
 
+@admin.register(TicketHistory)
+class TicketHistoryAdmin(admin.ModelAdmin):
+    list_display = ('ticket', 'user', 'datetime')
+    list_filter = ('datetime',)
