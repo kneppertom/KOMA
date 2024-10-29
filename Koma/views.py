@@ -2,6 +2,7 @@ from operator import truediv
 from pickle import FALSE
 
 from django.contrib.auth.models import Permission, User
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
@@ -10,6 +11,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import permission_required
 from .models import Ticket
 from django.contrib.contenttypes.models import ContentType
+from .forms import TicketForm
+from django.shortcuts import render, get_object_or_404, redirect
 
 def register(request):
     if request.method == 'POST':
@@ -43,37 +46,39 @@ def close_ticket(request, ticket_id):
     # Logik zum Schließen eines Tickets
     pass
 
+
 @login_required
-def create_ticket(request):
+def ticket_form(request, ticket_id=None):
+    return render(request, 'tickets/create/ticket_form.html')
+    ticket = None
+    if ticket_id:
+        ticket = get_object_or_404(Ticket, id=ticket_id)
+
     if request.method == 'POST':
-        title = request.POST['title']
-        description = request.POST['description']
-        ticket = Ticket.objects.create(
-            title=title,
-            description=description,
-            created_by=request.user
-        )
-        return redirect('ticket_list')  # Beispiel-Redirect, passe es an deine URLs an
+        if ticket:
+            form = TicketForm(request.POST, instance=ticket)
+        else:
+            form = TicketForm(request.POST)
 
-    return render(request, 'tickets/create_ticket.html')
+        if form.is_valid():
+            ticket = form.save(commit=False)
+            if not ticket_id:  # Falls es ein neues Ticket ist, setzen wir den Ersteller
+                ticket.created_by = request.user
+            ticket.save()
+            messages.success(request, "Das Ticket wurde erfolgreich gespeichert.")
+            return redirect('ticket_list')
+    else:
+        form = TicketForm(instance=ticket)
 
-@login_required
-# def user_list(request):
-#     # Hole alle Benutzer und Berechtigungen
-#     users = User.objects.all()
-#
-#     # Erstelle eine Liste von Benutzern und deren Berechtigungen
-#     user_permissions = []
-#     for user in users:
-#         permissions = user.get_all_permissions()  # Hole alle Berechtigungen des Benutzers
-#         user_permissions.append({
-#             'user': user,
-#             'permissions': permissions,
-#         })
-#
-#     # Übergib die Liste an das Template
-#     context = {'user_permissions': user_permissions}
-#     return render(request, 'user-list/user_list.html', context)
+    return render(request, 'ticket_form.html', {
+        'form': form,
+        'ticket': ticket,
+        'status_choices': Ticket.STATUS_CHOICES if ticket else None
+    })
+
+def ticket_list(request):
+    tickets = Ticket.objects.all()  # Hier werden alle Tickets abgerufen
+    return render(request, 'tickets/ticket_overview.html', {'tickets': tickets})
 
 @login_required
 #@permission_required('Ticketsystem.change_settings', raise_exception=True)
@@ -112,3 +117,52 @@ def user_list(request):
         'all_permissions': all_permissions
     }
     return render(request, 'user-list/user_list.html', context)
+
+from .forms import TicketForm
+
+@login_required
+def ticket_overview(request):
+    tickets = Ticket.objects.all().order_by('-created_at')
+    selected_ticket = tickets.first() if tickets.exists() else None
+
+    # Formularverarbeitung für ein neues Ticket
+    if request.method == 'POST':
+        form = TicketForm(request.POST)
+        if form.is_valid():
+            new_ticket = form.save(commit=False)
+            new_ticket.assigned_to = request.user
+            new_ticket.created_by = request.user
+            new_ticket.save()
+            # TicketHistory.objects.create(
+            #     ticket=new_ticket,
+            #     action_by=request.user,
+            #     action_text="Ticket erstellt"
+            # )
+            return redirect('ticket_overview')
+    else:
+        form = TicketForm()
+
+    context = {
+        'tickets': tickets,
+        'selected_ticket': selected_ticket,
+        'form': form,  # Das Formular für ein neues Ticket
+    }
+    return render(request, 'tickets/ticket_overview.html', context)
+
+
+def get_ticket(request, ticket_id):
+    try:
+        ticket = Ticket.objects.get(id=ticket_id)
+        data = {
+            'id': ticket.id,
+            'title': ticket.title,
+            'priority': ticket.priority,
+            'status': ticket.status,
+            'module': ticket.module.name if ticket.module else None,
+            'inspector': ticket.inspector.username if ticket.inspector else '',
+            'description': ticket.description,
+            'created_at': ticket.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+        }
+        return JsonResponse(data)
+    except Ticket.DoesNotExist:
+        return JsonResponse({'error': 'Ticket not found'}, status=404)

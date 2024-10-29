@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if ticket %}
+        Ticket bearbeiten - {{ ticket.title }}
+    {% else %}
+        Neues Ticket erstellen
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<h2>
+    {% if ticket %}
+        Ticket bearbeiten - {{ ticket.title }}
+    {% else %}
+        Neues Ticket erstellen
+    {% endif %}
+</h2>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    
+    <!-- Ticket Status Auswahl, falls es ein bestehendes Ticket ist -->
+    {% if ticket %}
+    <div class="form-group">
+        <label for="status">Status</label>
+        <select name="status" id="status" class="form-control">
+            {% for value, label in status_choices %}
+                <option value="{{ value }}" {% if ticket.status == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    {% endif %}
+    
+    <button type="submit" class="btn btn-primary mt-3">
+        {% if ticket %}
+            Aktualisieren
+        {% else %}
+            Erstellen
+        {% endif %}
+    </button>
+    <a href="{% url 'ticket_form' %}" class="btn btn-secondary mt-3">Abbrechen</a>
+</form>
+{% endblock %}

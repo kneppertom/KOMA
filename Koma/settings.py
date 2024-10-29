@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "bootstrap5",
 #    'rest_framework',
     'Koma',
+    'widget_tweaks',
 ]
 
 STATICFILES_DIRS = [

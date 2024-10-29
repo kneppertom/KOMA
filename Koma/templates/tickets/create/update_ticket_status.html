@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Ticket-Status ändern{% endblock %}
+
+{% block content %}
+<h2>Status des Tickets ändern: {{ ticket.title }}</h2>
+<form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="status">Neuer Status</label>
+        <select name="status" id="status" class="form-control">
+            {% for value, label in status_choices %}
+                <option value="{{ value }}" {% if ticket.status == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary mt-3">Speichern</button>
+    <a href="{% url 'ticket_list' %}" class="btn btn-secondary mt-3">Abbrechen</a>
+</form>
+{% endblock %}

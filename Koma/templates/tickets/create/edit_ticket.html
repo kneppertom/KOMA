@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 
-{% block title %}Ticket erstellen{% endblock %}
+{% block title %}Ticket bearbeiten{% endblock %}
 
 {% block content %}
-<h2>Neues Ticket erstellen</h2>
+<h2>Ticket bearbeiten</h2>
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Speichern !!</button>
+    <button type="submit" class="btn btn-primary">Speichern</button>
     <a href="{% url 'ticket_list' %}" class="btn btn-secondary">Abbrechen</a>
 </form>
 {% endblock %}

@@ -5,9 +5,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="91895775-5283-4797-80a9-992e7377349f" name="Changes" comment="Update">
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Koma/admin.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Koma/forms.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Koma/templates/ticket_form.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Koma/templates/tickets/create/edit_ticket.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Koma/templates/tickets/create/ticket_form.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Koma/templates/tickets/create/update_ticket_status.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Koma/templates/tickets/ticket_overview.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Koma/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/Koma/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Koma/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Koma/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Koma/templates/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/Koma/templates/home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Koma/templates/tickets/create/create_ticket.html" beforeDir="false" afterPath="$PROJECT_DIR$/Koma/templates/tickets/create/create_ticket.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Koma/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/Koma/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Koma/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/Koma/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -18,8 +30,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Python Script" />
         <option value="HTML File" />
+        <option value="Python Script" />
       </list>
     </option>
   </component>
@@ -33,12 +45,12 @@
     &quot;assignee&quot;: &quot;kneppertom&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/kneppertom/KOMA.git",
-    "accountId": "6d6631cf-e23d-4714-a0aa-ef56dd088187"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/kneppertom/KOMA.git&quot;,
+    &quot;accountId&quot;: &quot;6d6631cf-e23d-4714-a0aa-ef56dd088187&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 2
 }</component>
@@ -50,23 +62,33 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultHtmlFileTemplate": "HTML File",
-    "JavaScript Debug.index.html.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "C:/Users/KnepperTom/PycharmProjects/Koma",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "project.propVCSSupport.DirectoryMappings",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;JavaScript Debug.index.html.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/KnepperTom/PycharmProjects/Koma/Koma/templates&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;project.propVCSSupport.DirectoryMappings&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\KnepperTom\PycharmProjects\Koma\Koma\templates" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\KnepperTom\PycharmProjects\Koma\Koma\templates\tickets" />
+      <recent name="C:\Users\KnepperTom\PycharmProjects\Koma\Koma" />
+      <recent name="C:\Users\KnepperTom\PycharmProjects\Koma\Koma\templates\tickets\create" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -99,6 +121,9 @@
       <workItem from="1729000746868" duration="2465000" />
       <workItem from="1729010056489" duration="4919000" />
       <workItem from="1729609103833" duration="644000" />
+      <workItem from="1730048452621" duration="5783000" />
+      <workItem from="1730054605735" duration="3586000" />
+      <workItem from="1730190404638" duration="6714000" />
     </task>
     <task id="LOCAL-00001" summary="Update">
       <option name="closed" value="true" />

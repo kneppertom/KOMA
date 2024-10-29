@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-md-3">
+        <button id="create-ticket-btn" class="btn btn-primary w-100 mb-3">Ticket anlegen</button>
+        <a href="{% url 'home' %}" class="btn btn-secondary w-100 mb-3">Zurück zum Dashboard</a>
+        <nav class="list-group" id="ticket-list">
+            {% for ticket in tickets %}
+<!--                <a class="list-group-item list-group-item-action">-->
+<!--                    <strong>{{ ticket.title }}</strong><br>-->
+<!--                    {{ ticket.description }}-->
+<!--                </a>-->
+                <a class="list-group-item list-group-item-action" data-ticket-id="{{ ticket.id }}">
+                    <strong>{{ ticket.title }}</strong><br>
+                    {{ ticket.description }}
+                </a>
+            {% endfor %}
+        </nav>
+    </div>
+    <div class="col-md-9">
+        <div id="ticket-detail">
+            {% if selected_ticket %}
+                <h4><strong>Ticket #{{ selected_ticket.id }}: {{ selected_ticket.subject }}</strong></h4>
+                <p><strong>Priorität:</strong> {{ selected_ticket.priority }}</p>
+                <p><strong>Status:</strong> {{ selected_ticket.status }}</p>
+                <p><strong>Modul:</strong> {{ selected_ticket.module }}</p>
+                <p><strong>Bearbeiter:</strong> {{ selected_ticket.assigned_to }}</p>
+                <p><strong>Meldungstext:</strong> {{ selected_ticket.description }}</p>
+                <p><strong>Meldezeitpunkt:</strong> {{ selected_ticket.created_at }}</p>
+
+<!--                <h5>Historie</h5>-->
+<!--                <ul>-->
+<!--                    {% for history in selected_ticket.history %}-->
+<!--                        <li>{{ history.timestamp }} - {{ history.action_by }}: {{ history.action_text }}</li>-->
+<!--                    {% endfor %}-->
+<!--                </ul>-->
+            {% else %}
+                <p>Bitte wählen Sie ein Ticket aus der Liste.</p>
+            {% endif %}
+        </div>
+
+        <!-- Formular für ein neues Ticket -->
+        <div id="new-ticket-form" style="display: none;">
+            <h4><strong>Neues Ticket</strong></h4>
+            <form method="POST" action="">
+                {% csrf_token %}
+                {% load widget_tweaks %}
+                {{ form.as_p }}
+                <!-- Speichern-Button -->
+                <button type="submit" class="btn btn-success mt-3 w-100">Speichern</button>
+                <a href="{% url 'ticket_overview' %}" class="btn btn-secondary mt-3 ms-2">Zurück zur Ticketanzeige</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // JavaScript zur Umschaltung zwischen Ticketdetails und Formularansicht
+    document.getElementById('create-ticket-btn').addEventListener('click', function() {
+        document.getElementById('ticket-detail').style.display = 'none';
+        document.getElementById('new-ticket-form').style.display = 'block';
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+    const ticketListItems = document.querySelectorAll('#ticket-list a');
+
+    ticketListItems.forEach(item => {
+        item.addEventListener('click', function(event) {
+            event.preventDefault();
+
+            // Ticket-ID ermitteln (z.B. durch ein data-Attribut in der Liste)
+            const ticketId = this.getAttribute('data-ticket-id');
+
+            // Asynchrones Abrufen der Ticket-Details über Fetch API
+            fetch(`/get_ticket/${ticketId}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Details in der Detailansicht aktualisieren
+                    document.querySelector('#ticket-detail').innerHTML = `
+                        <h4><strong>Ticket #${data.id}: ${data.title}</strong></h4>
+                        <p><strong>Priorität:</strong> ${data.priority}</p>
+                        <p><strong>Status:</strong> ${data.status}</p>
+                        <p><strong>Modul:</strong> ${data.module}</p>
+                        <p><strong>Bearbeiter:</strong> ${data.inspector || ''}</p>
+                        <p><strong>Meldungstext:</strong> ${data.description}</p>
+                        <p><strong>Meldezeitpunkt:</strong> ${data.created_at}</p>
+                    `;
+                })
+                .catch(error => {
+                    console.error('Fehler beim Laden der Ticket-Details:', error);
+                });
+        });
+    });
+});
+
+</script>
+{% endblock %}
