@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Ticket bearbeiten{% endblock %}
+
+{% block content %}
+<h2>Ticket bearbeiten</h2>
+<form method="post">
+    {% csrf_token %}
+      <!-- Status ändern -->
+            <div class="form-group">
+                <label for="status">Status ändern</label>
+                <select id="status" name="status" class="form-control">
+                    <option value="open">Offen</option>
+                    <option value="in_progress">In Bearbeitung</option>
+                    <option value="completed">Abgeschlossen</option>
+                </select>
+            </div>
+
+            <!-- Änderung genehmigen/ablehnen -->
+            <div class="form-group">
+                <label for="approval">Änderung genehmigen/ablehnen</label>
+                <select id="approval" name="approval" class="form-control">
+                    <option value="approve">Genehmigen</option>
+                    <option value="reject">Ablehnen</option>
+                </select>
+            </div>
+
+            <!-- Weiterleiten -->
+            <div class="form-group">
+                <label for="forward_to">Weiterleiten an</label>
+                <input type="text" id="forward_to" name="forward_to" class="form-control" placeholder="Benutzername oder E-Mail">
+            </div>
+
+            <!-- Kommentar hinzufügen -->
+            <div class="form-group">
+                <label for="comment">Kommentar hinzufügen</label>
+                <textarea id="comment" name="comment" class="form-control" rows="4" placeholder="Kommentar hier eingeben..."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-3">Speichern</button>
+        </form>
+    </div>
+</body>
+</html>
+{% endblock %}
