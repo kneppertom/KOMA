@@ -6,8 +6,63 @@
 <h2>Neues Ticket erstellen</h2>
 <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
+  
+            <div class="mb-3">
+                <label for="title" class="form-label">Titel des Tickets</label>
+                <input type="text" class="form-control" id="title" name="title" required placeholder="Titel des Tickets">
+            </div>
+            <div class="mb-3">
+                <label for="title" class="form-label">Fehlertyp</label>
+                <select class="form-select" id="typ_error" name="typ_error" required>
+                    <option value="1">Tippfehler</option>
+                    <option value="2">Inhaltlicher Fehler</option>
+                    <option value="3">Technischer Fehler</option>
+                    <option value="4">Verbesserungsvorschlag</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="title" class="form-label">Betroffenes Material</label>
+                <select class="form-select" id="typ_material" name="typ_material" required>
+                    <option value="1">Lernskript</option>
+                    <option value="2">Lösungsheft</option>
+                    <option value="3">myCampus-Fragen</option>
+                    <option value="4">Vodcasts</option>
+                     <option value="5">Tutorien</option>
+                     <option value="6">Literaturangaben</option>
+                     <option value="7">weitere Materialien</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label">Beschreibung</label>
+                <textarea class="form-control" id="description" name="description" rows="4" required placeholder="Beschreiben Sie das Problem oder die Anfrage"></textarea>
+            </div>
+<div class="mb-3">
+                <label for="priority" class="form-label">Priorität</label>
+                <select class="form-select" id="priority" name="priority" required>
+                    <option value="1">Niedrig</option>
+                    <option value="2">Mittel</option>
+                    <option value="3">Hoch</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="module" class="form-label">Modul</label>
+                <input type="text" class="form-control" id="module" name="module" required placeholder="Modul">
+            </div>
+
+            <div class="mb-3">
+                <label for="module_short" class="form-label">Modulkürzel</label>
+                <input type="text" class="form-control" id="module_short" name="module_short" required placeholder="Modulkürzel">
+            </div>
+           
+<!--            <a href="{% url 'ticket_list' %}" class="btn btn-secondary">Zurück zur Übersicht</a>-->
+        </form>
+    </div>
+
     <button type="submit" class="btn btn-primary">Speichern !!</button>
     <a href="{% url 'ticket_list' %}" class="btn btn-secondary">Abbrechen</a>
 </form>
 {% endblock %}
+
