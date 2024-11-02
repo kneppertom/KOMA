@@ -7,13 +7,11 @@
         <a href="{% url 'home' %}" class="btn btn-secondary w-100 mb-3">Zurück zum Dashboard</a>
         <nav class="list-group" id="ticket-list">
             {% for ticket in tickets %}
-<!--                <a class="list-group-item list-group-item-action">-->
-<!--                    <strong>{{ ticket.title }}</strong><br>-->
-<!--                    {{ ticket.description }}-->
-<!--                </a>-->
                 <a class="list-group-item list-group-item-action" data-ticket-id="{{ ticket.id }}">
                     <strong>{{ ticket.title }}</strong><br>
-                    {{ ticket.description }}
+<!--                    {{ ticket.description }}-->
+                    <p>Priorität {{ ticket.priority }}</p>
+                    <p>Status {{ ticket.status }}</p>
                 </a>
             {% endfor %}
         </nav>
@@ -25,6 +23,13 @@
                 <p><strong>Priorität:</strong> <span class="badge badge-{{ selected_ticket.priority|lower }}">{{ selected_ticket.priority }}</span></p>
                 <p><strong>Status:</strong> <span class="badge badge-{{ selected_ticket.status|lower }}">{{ selected_ticket.status }}</span></p>
                 <p><strong>Modul:</strong> {{ selected_ticket.module }}</p>
+                <p><strong>Kategorie:</strong> {{ selected_ticket.category }}</p>
+                <p><strong>Betroffene Materialien:</strong>
+                    {% for material in selected_ticket.affected_materials.all %}
+                        {{ material.name }}
+                        {% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </p>
                 <p><strong>Bearbeiter:</strong> {{ selected_ticket.assigned_to }}</p>
                 <p><strong>Meldungstext:</strong> {{ selected_ticket.description }}</p>
                 <p><strong>Meldezeitpunkt:</strong> {{ selected_ticket.created_at|date:"d.m.Y H:i" }}</p>
@@ -76,6 +81,7 @@
                 .then(response => response.json())
                 .then(data => {
                     // Details in der Detailansicht aktualisieren
+                    let affectedMaterials = data.affected_materials.join(", ");
                     let historyHtml = '<h5>Ticket-Historie</h5><ul>';
                     data.history.forEach(entry => {
                         historyHtml += `<li>${entry.datetime} - ${entry.user}: ${entry.text} (Status: ${entry.status})</li>`;
@@ -86,6 +92,8 @@
                         <p><strong>Priorität:</strong> ${data.priority}</p>
                         <p><strong>Status:</strong> ${data.status}</p>
                         <p><strong>Modul:</strong> ${data.module}</p>
+                        <p><strong>Kategorie:</strong> ${data.categori}</p>
+                        <p><strong>Betroffene Materialien:</strong> ${affectedMaterials.name}</p>
                         <p><strong>Bearbeiter:</strong> ${data.inspector || ''}</p>
                         <p><strong>Meldungstext:</strong> ${data.description}</p>
                         <p><strong>Meldezeitpunkt:</strong> ${data.created_at}</p>

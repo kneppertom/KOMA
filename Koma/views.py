@@ -163,6 +163,9 @@ def get_ticket(request, ticket_id):
     try:
         ticket = Ticket.objects.get(id=ticket_id)
         history = TicketHistory.objects.filter(ticket=ticket).order_by('-datetime')
+        # Holen der betroffenen Materialien
+        affected_materials = ticket.affected_materials.all().values_list('name', flat=True)  # Zugriff auf die vielen Materialien
+        affected_materials_list = list(affected_materials)  # Liste der Materialnamen erstellen
 
         # Erstelle JSON-kompatibles Format für die Historie
         history_data = [
@@ -181,6 +184,8 @@ def get_ticket(request, ticket_id):
             'priority': ticket.priority,
             'status': ticket.status,
             'module': ticket.module.name if ticket.module else None,
+            'category': ticket.category if ticket.category else None,
+            'affected_materials': affected_materials_list if ticket.affected_materials else None,
             'inspector': ticket.inspector.username if ticket.inspector else '',
             'description': ticket.description,
             'created_at': ticket.created_at.strftime('%Y-%m-%d %H:%M:%S'),
@@ -189,3 +194,31 @@ def get_ticket(request, ticket_id):
         return JsonResponse(data)
     except Ticket.DoesNotExist:
         return JsonResponse({'error': 'Ticket not found'}, status=404)
+
+@login_required
+def ticket_form(request, ticket_id=None):
+    ticket = None
+    if ticket_id:
+        ticket = get_object_or_404(Ticket, id=ticket_id)
+
+    if request.method == 'POST':
+        if ticket:
+            form = TicketForm(request.POST, instance=ticket)
+        else:
+            form = TicketForm(request.POST)
+
+        if form.is_valid():
+            ticket = form.save(commit=False)
+            if not ticket_id:  # Falls es ein neues Ticket ist
+                ticket.created_by = request.user
+                ticket.status = 'Received'  # Setze den Status automatisch auf "Eingegangen"
+            ticket.save()
+            messages.success(request, "Das Ticket wurde erfolgreich gespeichert.")
+            return redirect('ticket_list')
+    else:
+        form = TicketForm(instance=ticket)
+
+    return render(request, 'tickets/create/ticket_form.html', {
+        'form': form,
+        'ticket': ticket,
+    })

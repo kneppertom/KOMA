@@ -1,7 +1,7 @@
 # Koma/admin.py
 
 from django.contrib import admin
-from .models import Ticket, TicketHistory, Module, ModuleManager, UserProfile, Login
+from .models import Ticket, TicketHistory, Module, ModuleManager, UserProfile, Login, AffectedMaterial
 
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
@@ -29,3 +29,7 @@ class LoginAdmin(admin.ModelAdmin):
 class TicketHistoryAdmin(admin.ModelAdmin):
     list_display = ('ticket', 'user', 'datetime')
     list_filter = ('datetime',)
+
+@admin.register(AffectedMaterial)
+class AffectedMaterialAdmin(admin.ModelAdmin):
+    list_display = ('name',)

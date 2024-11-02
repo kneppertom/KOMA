@@ -11,6 +11,20 @@ class Ticket(models.Model):
         ('CLOSED', 'Geschlossen'),
     ]
 
+    CATEGORY_CHOICES = [
+        ('TYPO', 'Tippfehler'),
+        ('CONTENT', 'Inhaltliche Unstimmigkeit'),
+        ('SUGGESTION', 'Verbesserungsvorschlag'),
+        ('GENERAL', 'Allgemein')
+    ]
+
+    AFFECTED_MATERIALS_CHOICES = [
+        ('SKRIPT', 'Skript'),
+        ('TUTORIEN', 'Tutorien'),
+        ('BOOKS', 'Bücher'),
+        ('GENERAL', 'Allgemein')
+    ]
+
     # Ticket Modell Attribute
     title = models.CharField(max_length=200, verbose_name="Titel")
     description = models.TextField(verbose_name="Beschreibung")
@@ -21,16 +35,23 @@ class Ticket(models.Model):
     inspector = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='inspected_tickets', verbose_name="Prüfer")  # Inspektor/Prüfer
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Erstellt am")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Aktualisiert am")
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, verbose_name="Kategorie", null=True, blank=True)
+    affected_materials = models.ManyToManyField('AffectedMaterial', verbose_name="Betroffene Materialien")
 
     def __str__(self):
         return self.title
 
-    class Meta:
-        app_label = 'Koma'
-        permissions = [
-            ("can_view_tickets", "Can view tickets"),
-            ("can_view_users", "Can view users"),
-        ]
+class AffectedMaterial(models.Model):
+    name = models.CharField(max_length=20, choices=Ticket.AFFECTED_MATERIALS_CHOICES, unique=True)
+
+    def __str__(self):
+        return self.get_name_display()
+class Meta:
+    app_label = 'Koma'
+    permissions = [
+        ("can_view_tickets", "Can view tickets"),
+        ("can_view_users", "Can view users"),
+    ]
 
 # TicketHistory Modell, ersetzt ChangeHistory
 class TicketHistory(models.Model):
