@@ -2,6 +2,7 @@
 {% extends "base.html" %}
 
 {% block content %}
+<!--
 <div class="container mt-4">
     <h2>Benutzerverwaltung</h2>
 <a href="{% url 'home' %}" class="btn btn-secondary mb-3">Zurück zum Dashboard</a>
@@ -60,4 +61,64 @@
         });
     });
 </script>
+-->
+<div class="container mt-4">
+    <h2>Benutzerverwaltung</h2>
+    <a href="{% url 'home' %}" class="btn btn-secondary mb-3">Zurück zum Dashboard</a>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="list-group">
+                {% for user_data in user_permissions %}
+                <a href="#" class="list-group-item list-group-item-action">
+                    {{ user_data.user.username }}
+                    <button type="button" class="btn btn-sm btn-link">Bearbeiten</button>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-md-8">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Berechtigungen</label>
+                    <div class="permissions-container">
+                        {% for permission in all_permissions %}
+                            <div class="form-check permission-item">
+                                <input type="checkbox" class="form-check-input" name="permissions_{{ user_data.user.id }}" value="{{ permission.id }}" {% if permission.codename in user_data.permissions %}checked{% endif %}>
+                                <label class="form-check-label">{{ permission.name }}</label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" name="save_user" value="{{ user_data.user.id }}">Speichern</button>
+                <button type="submit" class="btn btn-warning" name="reset_password" value="{{ user_data.user.id }}">Passwort zurücksetzen</button>
+                <button type="submit" class="btn btn-danger" name="delete_user" value="{{ user_data.user.id }}">User löschen</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .permissions-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px; /* Abstand zwischen den Elementen */
+    }
+    .permission-item {
+        flex: 1 1 auto; /* Erlaubt das Wachstum und Schrumpfen */
+        min-width: 150px; /* Mindestbreite für jede Checkbox */
+    }
+</style>
+
+<script>
+    $(document).ready(function() {
+        // Initialisiere Select2 für alle Mehrfachauswahlfelder
+        $('.permissions-dropdown').select2({
+            placeholder: 'Wähle Berechtigungen',
+            allowClear: true,
+            width: '60%'  // Passt die Breite an das umgebende Element an
+        });
+    });
+</script>
+
 {% endblock %}
