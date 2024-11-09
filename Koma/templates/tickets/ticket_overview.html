@@ -5,11 +5,10 @@
     <div class="col-md-3">
         <button id="create-ticket-btn" class="btn btn-primary w-100 mb-3">Ticket anlegen</button>
         <a href="{% url 'home' %}" class="btn btn-secondary w-100 mb-3">Zurück zum Dashboard</a>
-        <nav class="list-group" id="ticket-list">
+        <nav class="list-group overflow-auto" id="ticket-list" style="max-height: 600px;">
             {% for ticket in tickets %}
                 <a class="list-group-item list-group-item-action" data-ticket-id="{{ ticket.id }}">
                     <strong>{{ ticket.title }}</strong><br>
-<!--                    {{ ticket.description }}-->
                     <p>Priorität {{ ticket.priority }}</p>
                     <p>Status {{ ticket.status }}</p>
                 </a>
@@ -17,17 +16,17 @@
         </nav>
     </div>
     <div class="col-md-9">
-        <div id="ticket-detail" class="border p-3">
+        <!-- Bereich zur Anzeige der Ticketdetails -->
+        <div id="ticket-detail" class="border p-3" data-ticket-id="{{ selected_ticket.id }}">
             {% if selected_ticket %}
                 <h4><strong>Ticket #{{ selected_ticket.id }}: {{ selected_ticket.title }}</strong></h4>
-                <p><strong>Priorität:</strong> <span class="badge badge-{{ selected_ticket.priority|lower }}">{{ selected_ticket.priority }}</span></p>
-                <p><strong>Status:</strong> <span class="badge badge-{{ selected_ticket.status|lower }}">{{ selected_ticket.status }}</span></p>
+                <p><strong>Priorität:</strong> {{ selected_ticket.priority }}</p>
+                <p><strong>Status:</strong> {{ selected_ticket.status }}</p>
                 <p><strong>Modul:</strong> {{ selected_ticket.module }}</p>
                 <p><strong>Kategorie:</strong> {{ selected_ticket.category }}</p>
                 <p><strong>Betroffene Materialien:</strong>
                     {% for material in selected_ticket.affected_materials.all %}
-                        {{ material.name }}
-                        {% if not forloop.last %}, {% endif %}
+                        {{ material.name }}{% if not forloop.last %}, {% endif %}
                     {% endfor %}
                 </p>
                 <p><strong>Bearbeiter:</strong> {{ selected_ticket.assigned_to }}</p>
@@ -39,48 +38,57 @@
                         <li>{{ entry.datetime|date:"d.m.Y H:i" }} - {{ entry.user }}: {{ entry.text }} (Status: {{ entry.status }})</li>
                     {% endfor %}
                 </ul>
+                <button id="edit-ticket-btn" class="btn btn-warning mt-3">Bearbeiten</button>
             {% else %}
                 <p>Bitte wählen Sie ein Ticket aus der Liste.</p>
             {% endif %}
         </div>
-        <button id="update-ticket-btn" class="btn btn-primary w-100 mb-3">Ticket bearbeiten</button>
-        <!-- Formular für ein neues Ticket -->
-        <div id="new-ticket-form" style="display: none;">
-            <h4><strong>Neues Ticket</strong></h4>
-            <form method="POST" action="">
+
+        <!-- Bereich zur Anzeige des Formulars für neue oder zu bearbeitende Tickets -->
+        <div id="ticket-form-section" class="border p-3" style="display: none;">
+            <h4 id="form-title">Ticket erstellen oder bearbeiten</h4>
+            <form id="ticket-form" method="POST" action="">
                 {% csrf_token %}
-                {% load widget_tweaks %}
                 {{ form.as_p }}
-                <!-- Speichern-Button -->
-                <button type="submit" class="btn btn-success mt-3 w-100">Speichern</button>
-                <a href="{% url 'ticket_overview' %}" class="btn btn-secondary mt-3 ms-2">Zurück zur Ticketanzeige</a>
+                <button type="submit" class="btn btn-success w-100 mt-2" id="save-ticket-btn">Speichern</button>
+                <button type="button" id="cancel-btn" class="btn btn-secondary w-100 mt-2">Abbrechen</button>
             </form>
         </div>
     </div>
 </div>
 
 <script>
-    // JavaScript zur Umschaltung zwischen Ticketdetails und Formularansicht
+document.addEventListener('DOMContentLoaded', function() {
+    // Event für das Erstellen eines neuen Tickets
     document.getElementById('create-ticket-btn').addEventListener('click', function() {
         document.getElementById('ticket-detail').style.display = 'none';
-        document.getElementById('new-ticket-form').style.display = 'block';
+        document.getElementById('ticket-form-section').style.display = 'block';
+        document.getElementById('ticket-form').action = "{% url 'ticket_overview' %}";
+        document.getElementById('form-title').innerText = "Neues Ticket erstellen";
+
+        // Leeren des Formulars für ein neues Ticket
+        document.querySelector('input[name="title"]').value = '';
+        document.querySelector('textarea[name="description"]').value = '';
+        document.querySelector('input[name="priority"]').value = '';
+        document.querySelector('select[name="module"]').value = '';
+        document.querySelector('select[name="category"]').value = '';
+        document.querySelectorAll('input[name="affected_materials"]').forEach(checkbox => {
+            checkbox.checked = false;
+        });
     });
 
-    document.addEventListener('DOMContentLoaded', function() {
+    // Event für das Laden und Anzeigen der Ticket-Details
     const ticketListItems = document.querySelectorAll('#ticket-list a');
 
     ticketListItems.forEach(item => {
         item.addEventListener('click', function(event) {
             event.preventDefault();
-
-            // Ticket-ID ermitteln (z.B. durch ein data-Attribut in der Liste)
             const ticketId = this.getAttribute('data-ticket-id');
 
-            // Asynchrones Abrufen der Ticket-Details über Fetch API
             fetch(`/get_ticket/${ticketId}`)
                 .then(response => response.json())
                 .then(data => {
-                    // Details in der Detailansicht aktualisieren
+                    // Details anzeigen
                     let affectedMaterials = data.affected_materials.join(", ");
                     let historyHtml = '<h5>Ticket-Historie</h5><ul>';
                     data.history.forEach(entry => {
@@ -92,19 +100,89 @@
                         <p><strong>Priorität:</strong> ${data.priority}</p>
                         <p><strong>Status:</strong> ${data.status}</p>
                         <p><strong>Modul:</strong> ${data.module}</p>
-                        <p><strong>Kategorie:</strong> ${data.categori}</p>
-                        <p><strong>Betroffene Materialien:</strong> ${affectedMaterials.name}</p>
-                        <p><strong>Bearbeiter:</strong> ${data.inspector || ''}</p>
+                        <p><strong>Kategorie:</strong> ${data.category}</p>
+                        <p><strong>Betroffene Materialien:</strong> ${affectedMaterials}</p>
+                        <p><strong>Bearbeiter:</strong> ${data.assigned_to || ''}</p>
                         <p><strong>Meldungstext:</strong> ${data.description}</p>
                         <p><strong>Meldezeitpunkt:</strong> ${data.created_at}</p>
                         ${historyHtml}
+                        <button id="edit-ticket-btn" class="btn btn-warning mt-3">Bearbeiten</button>
                     `;
+                    document.getElementById('ticket-detail').style.display = 'block';
+                    document.getElementById('ticket-form-section').style.display = 'none';
+
+                    // Event für den Bearbeiten-Button nach dem Laden der Details neu setzen
+                    document.getElementById('edit-ticket-btn').addEventListener('click', function() {
+                        const selectedTicketId = data.id;
+                        if (selectedTicketId) {
+                            fetch(`/edit_ticket/${selectedTicketId}`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    document.getElementById('ticket-detail').style.display = 'none';
+                                    document.getElementById('ticket-form-section').style.display = 'block';
+                                    document.getElementById('ticket-form').action = `/update_ticket/${selectedTicketId}/`;
+                                    document.getElementById('form-title').innerText = "Ticket bearbeiten";
+
+                                    // Formularfelder füllen
+                                    document.querySelector('input[name="title"]').value = data.title || '';
+                                    document.querySelector('textarea[name="description"]').value = data.description || '';
+                                    document.querySelector('input[name="priority"]').value = data.priority || '';
+                                    document.querySelector('select[name="module"]').value = data.module || '';
+                                    document.querySelector('select[name="category"]').value = data.category || '';
+                                    const materials = data.affected_materials || [];
+                                    document.querySelectorAll('input[name="affected_materials"]').forEach(checkbox => {
+                                        checkbox.checked = materials.includes(parseInt(checkbox.value));
+                                    });
+                                })
+                                .catch(error => console.error('Fehler beim Laden des Ticket-Bearbeitungsformulars:', error));
+                        }
+                    });
                 })
-                .catch(error => {
-                    console.error('Fehler beim Laden der Ticket-Details:', error);
-                });
-            });
+                .catch(error => console.error('Fehler beim Laden der Ticket-Details:', error));
         });
     });
+
+    // Event zum Abbrechen des Formulars
+    document.getElementById('cancel-btn').addEventListener('click', function() {
+        document.getElementById('ticket-form-section').style.display = 'none';
+        document.getElementById('ticket-detail').style.display = 'block';
+    });
+
+    // Event zum Speichern des Formulars
+    document.getElementById('ticket-form').addEventListener('submit', function(event) {
+        event.preventDefault(); // Standardverhalten des Formulars verhindern
+        const formData = new FormData(this); // Formulardaten sammeln
+        console.log(this.action);
+        const actionUrl = this.action;
+        if (!actionUrl.includes('update_ticket')) {
+            // Beispiel: Die Action auf '/tickets/create/' ändern
+            this.action = '/create_ticket/';
+        }
+        fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}', // CSRF-Token für Django
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error('Netzwerkantwort war nicht ok.');
+        })
+        .then(data => {
+            if (data.status === 'success') {
+            // Nach erfolgreichem Speichern zur Ticketübersicht weiterleiten
+            window.location.href = "{% url 'ticket_overview' %}";
+        } else {
+            console.error('Fehler:', data.errors);
+        }
+        })
+        .catch(error => console.error('Fehler beim Speichern des Tickets:', error));
+    });
+});
 </script>
+
 {% endblock %}

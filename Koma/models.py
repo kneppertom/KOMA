@@ -37,6 +37,8 @@ class Ticket(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Aktualisiert am")
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, verbose_name="Kategorie", null=True, blank=True)
     affected_materials = models.ManyToManyField('AffectedMaterial', verbose_name="Betroffene Materialien")
+    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True,
+                                    related_name='assigned_tickets')
 
     def __str__(self):
         return self.title

@@ -13,6 +13,7 @@ from .models import Ticket, TicketHistory
 from django.contrib.contenttypes.models import ContentType
 from .forms import TicketForm
 from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse
 
 def register(request):
     if request.method == 'POST':
@@ -34,47 +35,6 @@ def home(request):
     context = {'has_ticket_permission': has_ticket_permission, 'has_userview_permission': has_userview_permission}
     print(f"has_settings_permission: {has_userview_permission}")  # Debug-Ausgabe
     return render(request, 'home.html', context)
-
-# Prüfer kann Tickets bearbeiten und schließen
-@permission_required('Ticketsystem.change_ticket', raise_exception=True)
-def edit_ticket(request, ticket_id):
-    # Logik zum Bearbeiten eines Tickets
-    pass
-
-@permission_required('Ticketsystem.close_ticket', raise_exception=True)
-def close_ticket(request, ticket_id):
-    # Logik zum Schließen eines Tickets
-    pass
-
-
-@login_required
-def ticket_form(request, ticket_id=None):
-    return render(request, 'tickets/create/ticket_form.html')
-    ticket = None
-    if ticket_id:
-        ticket = get_object_or_404(Ticket, id=ticket_id)
-
-    if request.method == 'POST':
-        if ticket:
-            form = TicketForm(request.POST, instance=ticket)
-        else:
-            form = TicketForm(request.POST)
-
-        if form.is_valid():
-            ticket = form.save(commit=False)
-            if not ticket_id:  # Falls es ein neues Ticket ist, setzen wir den Ersteller
-                ticket.created_by = request.user
-            ticket.save()
-            messages.success(request, "Das Ticket wurde erfolgreich gespeichert.")
-            return redirect('ticket_list')
-    else:
-        form = TicketForm(instance=ticket)
-
-    return render(request, 'ticket_form.html', {
-        'form': form,
-        'ticket': ticket,
-        'status_choices': Ticket.STATUS_CHOICES if ticket else None
-    })
 
 def ticket_list(request):
     tickets = Ticket.objects.all()  # Hier werden alle Tickets abgerufen
@@ -121,53 +81,26 @@ def user_list(request):
 from .forms import TicketForm
 
 @login_required
-def ticket_overview(request):
+def ticket_overview(request, ticket_id=None):
     tickets = Ticket.objects.all().order_by('-created_at')
-    selected_ticket = tickets.first() if tickets.exists() else None
-    history_entries = []  # Standardmäßig leere Liste für den Verlauf
+    selected_ticket = get_object_or_404(Ticket, id=ticket_id) if ticket_id else tickets.first()
 
-    # Historie des ausgewählten Tickets abrufen, falls ein Ticket ausgewählt ist
-    if selected_ticket:
-        history_entries = TicketHistory.objects.filter(ticket=selected_ticket).order_by('-datetime')
-
-    # Formularverarbeitung für ein neues Ticket
-    if request.method == 'POST':
-        form = TicketForm(request.POST)
-        if form.is_valid():
-            new_ticket = form.save(commit=False)
-            new_ticket.assigned_to = request.user
-            new_ticket.created_by = request.user
-            new_ticket.save()
-            # TicketHistory-Eintrag erstellen, wenn ein neues Ticket angelegt wird
-            TicketHistory.objects.create(
-                ticket=new_ticket,
-                text="Ticket erstellt",
-                status=new_ticket.status,
-                datetime=new_ticket.created_at,
-                user=request.user
-            )
-            return redirect('ticket_overview')
-    else:
-        form = TicketForm()
+    history_entries = TicketHistory.objects.filter(ticket=selected_ticket).order_by('-datetime') if selected_ticket else []
 
     context = {
         'tickets': tickets,
         'selected_ticket': selected_ticket,
-        'history_entries': history_entries,  # Historie dem Kontext hinzufügen
-        'form': form,  # Das Formular für ein neues Ticket
+        'history_entries': history_entries,
+        'form': TicketForm(instance=selected_ticket),
     }
     return render(request, 'tickets/ticket_overview.html', context)
-
 
 def get_ticket(request, ticket_id):
     try:
         ticket = Ticket.objects.get(id=ticket_id)
         history = TicketHistory.objects.filter(ticket=ticket).order_by('-datetime')
-        # Holen der betroffenen Materialien
-        affected_materials = ticket.affected_materials.all().values_list('name', flat=True)  # Zugriff auf die vielen Materialien
-        affected_materials_list = list(affected_materials)  # Liste der Materialnamen erstellen
+        affected_materials = list(ticket.affected_materials.all().values_list('name', flat=True))
 
-        # Erstelle JSON-kompatibles Format für die Historie
         history_data = [
             {
                 'datetime': entry.datetime.strftime('%Y-%m-%d %H:%M:%S'),
@@ -185,8 +118,7 @@ def get_ticket(request, ticket_id):
             'status': ticket.status,
             'module': ticket.module.name if ticket.module else None,
             'category': ticket.category if ticket.category else None,
-            'affected_materials': affected_materials_list if ticket.affected_materials else None,
-            'inspector': ticket.inspector.username if ticket.inspector else '',
+            'affected_materials': affected_materials,
             'description': ticket.description,
             'created_at': ticket.created_at.strftime('%Y-%m-%d %H:%M:%S'),
             'history': history_data,
@@ -195,30 +127,85 @@ def get_ticket(request, ticket_id):
     except Ticket.DoesNotExist:
         return JsonResponse({'error': 'Ticket not found'}, status=404)
 
-@login_required
-def ticket_form(request, ticket_id=None):
-    ticket = None
-    if ticket_id:
-        ticket = get_object_or_404(Ticket, id=ticket_id)
-
+def edit_ticket(request, ticket_id):
+    # ticket = get_object_or_404(Ticket, id=ticket_id)
+    ticket = Ticket.objects.get(id=ticket_id)
     if request.method == 'POST':
-        if ticket:
-            form = TicketForm(request.POST, instance=ticket)
+        form = TicketForm(request.POST, instance=ticket)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Das Ticket wurde erfolgreich aktualisiert.")
+            return JsonResponse({'status': 'success', 'message': 'Ticket aktualisiert'})
         else:
-            form = TicketForm(request.POST)
+            return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
+    else:
+        # JSON-Daten für das Ticket zurückgeben, wenn GET-Request
+        data = {
+            'id': ticket.id,
+            'title': ticket.title,
+            'description': ticket.description,
+            'priority': ticket.priority,
+            'module': ticket.module.id if ticket.module else None,
+            'category': ticket.category if ticket.category else None,
+            'affected_materials': list(ticket.affected_materials.values_list('id', flat=True)),
+        }
+        return JsonResponse(data)
 
+# # View zum Erstellen eines neuen Tickets
+# def create_ticket(request):
+#     if request.method == 'POST':
+#         form = TicketForm(request.POST)
+#         if form.is_valid():
+#             form.save()
+#             return redirect(reverse('ticket_list'))  # Zurück zur Ticketliste oder zu einer anderen Zielseite
+#     else:
+#         form = TicketForm()
+#
+#     return render(request, 'tickets/ticket_form.html', {'form': form, 'action': 'Erstellen'})
+
+# View zum Erstellen eines neuen Tickets
+def create_ticket(request):
+    if request.method == 'POST':
+        form = TicketForm(request.POST)
         if form.is_valid():
             ticket = form.save(commit=False)
-            if not ticket_id:  # Falls es ein neues Ticket ist
-                ticket.created_by = request.user
-                ticket.status = 'Received'  # Setze den Status automatisch auf "Eingegangen"
-            ticket.save()
-            messages.success(request, "Das Ticket wurde erfolgreich gespeichert.")
-            return redirect('ticket_list')
+            ticket.created_by = request.user
+            ticket = form.save()
+            # Wenn der Request über AJAX kommt, JSON-Antwort zurückgeben
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'status': 'success', 'ticket_id': ticket.id})
+            # Ansonsten eine reguläre Umleitung
+            return redirect(reverse('ticket_list'))  # Zielseite bei erfolgreicher Speicherung
+        else:
+            # Bei Validierungsfehlern auch JSON zurückgeben
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
     else:
+        form = TicketForm()
+
+    # Für reguläre, nicht-JavaScript-basierte Aufrufe
+    return render(request, 'tickets/ticket_form.html', {'form': form, 'action': 'Erstellen'})
+
+def update_ticket(request, ticket_id):
+    # Ticket-Objekt aus der Datenbank holen
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+
+    if request.method == "POST":
+        # Das Formular mit POST-Daten und dem bestehenden Ticket-Objekt füllen
+        form = TicketForm(request.POST, instance=ticket)
+        if form.is_valid():
+            # Wenn das Formular gültig ist, Ticket speichern
+            form.save()
+            # Wenn der Request über AJAX kommt, eine JSON-Antwort senden
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'status': 'success', 'message': 'Ticket erfolgreich aktualisiert'})
+
+            # Ansonsten eine reguläre Umleitung oder das Rendern einer HTML-Seite
+            return redirect(reverse('ticket_overview', kwargs={'ticket_id': ticket.id}))
+
+    else:
+        # Wenn es kein POST-Request ist, wird das Formular zum Bearbeiten angezeigt
         form = TicketForm(instance=ticket)
 
-    return render(request, 'tickets/create/ticket_form.html', {
-        'form': form,
-        'ticket': ticket,
-    })
+    # Formular-Template nur bei GET-Anfragen laden
+    return render(request, 'tickets/ticket_overview.html', {'form': form})
