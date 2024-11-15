@@ -1,124 +1,84 @@
 <!-- user_list.html -->
 {% extends "base.html" %}
-
+{% load custom_filters %}
 {% block content %}
-<!--
-<div class="container mt-4">
-    <h2>Benutzerverwaltung</h2>
-<a href="{% url 'home' %}" class="btn btn-secondary mb-3">Zurück zum Dashboard</a>
-    <form method="POST">
-        {% csrf_token %}
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Benutzername</th>
-                    <th>Email</th>
-                    <th>Berechtigungen</th>
-                    <th>Neue Berechtigungen hinzufügen</th>
-                    <th>Aktion</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for user_data in user_permissions %}
-                <tr>
-                    <td>{{ user_data.user.username }}</td>
-                    <td>{{ user_data.user.email }}</td>
-                    <td>
-                        <ul>
-                            {% for permission in user_data.permissions %}
-                            <li>
-                                <button type="submit" class="btn btn-danger btn-sm" name="remove_permission" value="{{ user_data.user.id }}-{{ permission }}">{{ permission }}</button>
-                            </li>
-                                {% empty %}
-                            <li>Keine Berechtigungen</li>
-                            {% endfor %}
-                        </ul>
-                    </td>
-                        <td>
-                        <select name="permissions_{{ user_data.user.id }}" multiple class="form-control permissions-dropdown js-example-basic-multiple">
-                            {% for permission in all_permissions %}
-                            <option value="{{ permission.id }}" {% if permission.codename in user_data.permissions %}selected{% endif %}>{{ permission.name }}</option>
-                            {% endfor %}
-                        </select>
-                        </td>
-                    <td>
-                        <button type="submit" class="btn btn-primary" name="save_user" value="{{ user_data.user.id }}">Speichern</button>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </form>
-</div>
 
-<script>
-    $(document).ready(function() {
-        // Initialisiere Select2 für alle Mehrfachauswahlfelder
-        $('.permissions-dropdown').select2({
-            placeholder: 'Wähle Berechtigungen',
-            allowClear: true,
-            width: '60%'  // Passt die Breite an das umgebende Element an
-        });
-    });
-</script>
--->
 <div class="container mt-4">
     <h2>Benutzerverwaltung</h2>
     <a href="{% url 'home' %}" class="btn btn-secondary mb-3">Zurück zum Dashboard</a>
     <div class="row">
         <div class="col-md-4">
             <div class="list-group">
+                <!-- User-Auswahl mit Click-Event, das die ID speichert -->
                 {% for user_data in user_permissions %}
-                <a href="#" class="list-group-item list-group-item-action">
-                    {{ user_data.user.username }}
-                    <button type="button" class="btn btn-sm btn-link">Bearbeiten</button>
+                <a href="?selected_user={{ user_data.user.id }}" class="list-group-item list-group-item-action {% if request.GET.selected_user|stringformat:"s" == user_data.user.id|stringformat:"s" %}list-group-item-secondary{% endif %}">
+                    <h4>{{ user_data.user.username }}</h4>
+
+                    <!-- Container für Badges -->
+                    <div class="position-absolute top-0 end-0 d-flex align-items-center">
+                        <!-- Anzeige für den Administrator- oder Staff-Status -->
+                        {% if user_data.user.is_superuser %}
+                            <span class="badge bg-danger">Administrator</span>
+                        {% elif user_data.user.is_staff %}
+                            <span class="badge bg-primary">Team</span>
+                        {% endif %}
+
+                        <!-- Anzeige für deaktivierte Benutzer (immer ganz rechts) -->
+                        {% if not user_data.user.is_active %}
+                            <span class="badge bg-secondary">Deaktiviert</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Zusätzliche Informationen für den ausgewählten Benutzer -->
+                    {% if request.GET.selected_user|stringformat:"s" == user_data.user.id|stringformat:"s" %}
+                        <div class="mt-2">
+                            <p class="mb-1"><strong>Name:</strong> {{ user_data.user.first_name }} {{ user_data.user.last_name }}</p>
+                            <p class="mb-1"><strong>E-Mail:</strong> {{ user_data.user.email }}</p>
+                            <p class="mb-1"><strong>Letzte Anmeldung:</strong> {{ user_data.user.last_login|date:"d.m.Y H:i:s" }}</p>
+                        </div>
+                    {% endif %}
                 </a>
                 {% endfor %}
             </div>
         </div>
         <div class="col-md-8">
+            <!-- Abrufen der ausgewählten User-ID aus der URL -->
+            {% if request.GET.selected_user %}
+            {% with selected_user=request.GET.selected_user %}
+            {% for user_data in user_permissions %}
+            {% if user_data.user.id|stringformat:"s" == selected_user %}
             <form method="POST">
                 {% csrf_token %}
+                <h4>Berechtigungen für {{ user_data.user.username }}</h4>
                 <div class="form-group">
-                    <label>Berechtigungen</label>
-                    <div class="permissions-container">
-                        {% for permission in all_permissions %}
-                            <div class="form-check permission-item">
-                                <input type="checkbox" class="form-check-input" name="permissions_{{ user_data.user.id }}" value="{{ permission.id }}" {% if permission.codename in user_data.permissions %}checked{% endif %}>
-                                <label class="form-check-label">{{ permission.name }}</label>
-                            </div>
-                        {% endfor %}
+                    <div class="permissions-container d-flex flex-wrap">
+                        <div class="row">
+                            {% for permission in all_permissions %}
+                                <div class="col-12 col-md-4 mb-1">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" name="permissions_{{ user_data.user.id }}" value="{{ permission.id }}"
+                                               {% if user_data.permissions|matches_suffix:permission.codename %}checked{% endif %}
+                                        <label class="form-check-label">{{ permission.name }}</label>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
                 <button type="submit" class="btn btn-primary" name="save_user" value="{{ user_data.user.id }}">Speichern</button>
                 <button type="submit" class="btn btn-warning" name="reset_password" value="{{ user_data.user.id }}">Passwort zurücksetzen</button>
                 <button type="submit" class="btn btn-danger" name="delete_user" value="{{ user_data.user.id }}">User löschen</button>
+
             </form>
+            {% endif %}
+            {% endfor %}
+            {% endwith %}
+            {% else %}
+            <br><br><br><p>Einen Benutzer auswählen, um mehr Informationen zu sehen.</p>
+            {% endif %}
         </div>
     </div>
 </div>
 
-<style>
-    .permissions-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px; /* Abstand zwischen den Elementen */
-    }
-    .permission-item {
-        flex: 1 1 auto; /* Erlaubt das Wachstum und Schrumpfen */
-        min-width: 150px; /* Mindestbreite für jede Checkbox */
-    }
-</style>
-
-<script>
-    $(document).ready(function() {
-        // Initialisiere Select2 für alle Mehrfachauswahlfelder
-        $('.permissions-dropdown').select2({
-            placeholder: 'Wähle Berechtigungen',
-            allowClear: true,
-            width: '60%'  // Passt die Breite an das umgebende Element an
-        });
-    });
-</script>
 
 {% endblock %}

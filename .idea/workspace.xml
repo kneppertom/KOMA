@@ -5,8 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="91895775-5283-4797-80a9-992e7377349f" name="Changes" comment="Update">
+      <change afterPath="$PROJECT_DIR$/Koma/templatetags/custom_filters.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Koma/templates/tickets/ticket_overview.html" beforeDir="false" afterPath="$PROJECT_DIR$/Koma/templates/tickets/ticket_overview.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Koma/templates/user-list/user_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/Koma/templates/user-list/user_list.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -25,7 +27,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="Benny_Test_v1" />
+        <entry key="$PROJECT_DIR$" value="main" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -76,6 +78,7 @@
       <recent name="C:\Users\KnepperTom\PycharmProjects\Koma\Koma\templates" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Benny\Documents\GitHub\KOMA\Koma\templatetags" />
       <recent name="C:\Users\KnepperTom\PycharmProjects\Koma\Koma\templates\tickets" />
       <recent name="C:\Users\KnepperTom\PycharmProjects\Koma\Koma" />
       <recent name="C:\Users\KnepperTom\PycharmProjects\Koma\Koma\templates\tickets\create" />
@@ -125,6 +128,9 @@
       <workItem from="1730793590434" duration="2187000" />
       <workItem from="1730823164716" duration="6775000" />
       <workItem from="1731069540196" duration="10766000" />
+      <workItem from="1731408970985" duration="5146000" />
+      <workItem from="1731486277216" duration="15073000" />
+      <workItem from="1731665713124" duration="17589000" />
     </task>
     <task id="LOCAL-00001" summary="Update">
       <option name="closed" value="true" />
