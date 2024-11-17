@@ -215,8 +215,36 @@ def add_remark(request, ticket_id):
                 ticket.status = new_status  # Ticketstatus aktualisieren
                 ticket.save()  # Ticket speichern
             remark.save()
+            # Hole die aktuellen Ticketdaten und Historie
+            history = TicketHistory.objects.filter(ticket=ticket).order_by('-datetime')
+            history_data = [
+                {
+                    'datetime': entry.datetime.strftime('%Y-%m-%d %H:%M:%S'),
+                    'user': entry.user.username,
+                    'text': entry.text,
+                    'status': entry.status,
+                }
+                for entry in history
+            ]
             # Erfolgreiche JSON-Antwort
-            return JsonResponse({'status': 'success', 'message': 'Bemerkung hinzugefügt'})
+            # return JsonResponse({'status': 'success', 'message': 'Bemerkung hinzugefügt'})
+            # Rückgabe der Ticket-Details und der Historie
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Bemerkung hinzugefügt',
+                'ticket': {
+                    'id': ticket.id,
+                    'title': ticket.title,
+                    'priority': ticket.priority,
+                    'status': ticket.status,
+                    'module': ticket.module.name if ticket.module else None,
+                    'category': ticket.category if ticket.category else None,
+                    'affected_materials': list(ticket.affected_materials.all().values_list('name', flat=True)),
+                    'description': ticket.description,
+                    'created_at': ticket.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                    'history': history_data,
+                }
+            })
         else:
             # Fehlerhafte JSON-Antwort mit Formularfehlern
             return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)

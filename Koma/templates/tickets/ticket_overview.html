@@ -112,7 +112,35 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    window.location.href = "{% url 'ticket_overview' %}";
+                    // Ticketdetails und Historie aus der Antwort holen
+                    const ticketData = data.ticket;
+
+                    // Aktualisiere die Ticketdetailansicht im DOM
+                    let affectedMaterials = ticketData.affected_materials.join(", ");
+                    let historyHtml = '<h5>Ticket-Historie</h5><ul>';
+                    ticketData.history.forEach(entry => {
+                        historyHtml += `<li>${entry.datetime} - ${entry.user}: ${entry.text} (Status: ${entry.status})</li>`;
+                    });
+                    historyHtml += '</ul>';
+
+                    document.querySelector('#ticket-detail').innerHTML = `
+                        <h4><strong>Ticket #${ticketData.id}: ${ticketData.title}</strong></h4>
+                        <p><strong>Priorität:</strong> ${ticketData.priority}</p>
+                        <p><strong>Status:</strong> ${ticketData.status}</p>
+                        <p><strong>Modul:</strong> ${ticketData.module}</p>
+                        <p><strong>Kategorie:</strong> ${ticketData.category}</p>
+                        <p><strong>Betroffene Materialien:</strong> ${affectedMaterials}</p>
+                        <p><strong>Bearbeiter:</strong> ${ticketData.assigned_to || ''}</p>
+                        <p><strong>Meldungstext:</strong> ${ticketData.description}</p>
+                        <p><strong>Meldezeitpunkt:</strong> ${ticketData.created_at}</p>
+                        ${historyHtml}
+                        <button id="edit-ticket-btn" class="btn btn-warning mt-3">Bearbeiten</button>
+                        <button id="add-remark-btn" class="btn btn-warning mt-3" >Bemerkung hinzufügen</button>
+                    `;
+
+                    // Ticket-Detail wieder anzeigen und Bemerkungsformular ausblenden
+                    document.getElementById('ticket-detail').style.display = 'block';
+                    document.getElementById('remark-form-section').style.display = 'none';
                 } else {
                     console.error('Fehler beim Speichern der Bemerkung:', data.errors);
                 }
