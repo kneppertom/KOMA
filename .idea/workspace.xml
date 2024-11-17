@@ -5,10 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="91895775-5283-4797-80a9-992e7377349f" name="Changes" comment="Update">
-      <change afterPath="$PROJECT_DIR$/Koma/templatetags/custom_filters.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Koma/templates/statistics/statistic_overview.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Koma/templates/user-list/user_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/Koma/templates/user-list/user_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Koma/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/Koma/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Koma/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/Koma/templates/base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Koma/templates/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/Koma/templates/home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Koma/templates/tickets/ticket_overview.html" beforeDir="false" afterPath="$PROJECT_DIR$/Koma/templates/tickets/ticket_overview.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Koma/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/Koma/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Koma/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/Koma/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -19,8 +23,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="HTML File" />
         <option value="Python Script" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
@@ -39,12 +43,12 @@
     &quot;assignee&quot;: &quot;kneppertom&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/kneppertom/KOMA.git&quot;,
-    &quot;accountId&quot;: &quot;6d6631cf-e23d-4714-a0aa-ef56dd088187&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/kneppertom/KOMA.git",
+    "accountId": "484f9b7e-bbf1-48ad-b85b-e44067a98496"
   }
-}</component>
+}]]></component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 2
 }</component>

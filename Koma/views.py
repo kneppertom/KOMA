@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import permission_required
 from .models import Ticket, TicketHistory
 from django.contrib.contenttypes.models import ContentType
-from .forms import TicketForm
+from .forms import TicketForm, TicketHistoryForm
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 
@@ -209,3 +209,51 @@ def update_ticket(request, ticket_id):
 
     # Formular-Template nur bei GET-Anfragen laden
     return render(request, 'tickets/ticket_overview.html', {'form': form})
+
+@login_required
+def add_remark(request, ticket_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+
+    if request.method == 'POST':
+        form = TicketHistoryForm(request.POST)
+        if form.is_valid():
+            remark = form.save(commit=False)
+            remark.ticket = ticket
+            remark.user = request.user  # Angemeldeter Benutzer wird als User gesetzt
+            remark.save()
+            # Erfolgreiche JSON-Antwort
+            return JsonResponse({'status': 'success', 'message': 'Bemerkung hinzugefügt'})
+        else:
+            # Fehlerhafte JSON-Antwort mit Formularfehlern
+            return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
+
+    # Falls eine GET-Anfrage auf diese View geschickt wird, schicke eine leere JSON-Antwort oder eine Fehlermeldung
+    return JsonResponse({'status': 'error', 'message': 'GET-Anfrage nicht erlaubt'}, status=405)
+
+@login_required
+def statistic_overview(request):
+    # Daten für das Ticketstatus-Diagramm abrufen
+    status_counts = {
+        'Eingegangen': Ticket.objects.filter(status='Received').count(),
+        'In Bearbeitung': Ticket.objects.filter(status='IN_PROGRESS').count(),
+        'Frage offen': Ticket.objects.filter(status='QUESTION_OPEN').count(),
+        'Frage beantwortet': Ticket.objects.filter(status='QUESTION_ANSWERED').count(),
+        'Weitergeleitet': Ticket.objects.filter(status='FORWARDED').count(),
+        'Geschlossen': Ticket.objects.filter(status='CLOSED').count(),
+    }
+
+    # Daten für das Ticketkategorien-Diagramm abrufen
+    category_counts = {
+        'Tippfehler': Ticket.objects.filter(category='TYPO').count(),
+        'Inhaltliche Unstimmigkeit': Ticket.objects.filter(category='CONTENT').count(),
+        'Verbesserungsvorschlag': Ticket.objects.filter(category='SUGGESTION').count(),
+        'Allgemein': Ticket.objects.filter(category='GENERAL').count(),
+    }
+
+    # Kontext mit Daten für die Diagramme erstellen
+    context = {
+        'status_counts': status_counts,
+        'category_counts': category_counts,
+    }
+
+    return render(request, 'statistics/statistic_overview.html', context)

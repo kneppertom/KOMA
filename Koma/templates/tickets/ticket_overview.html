@@ -52,6 +52,7 @@
                         {% endfor %}
                     </ul>
                     <button id="edit-ticket-btn" class="btn btn-warning mt-3">Bearbeiten</button>
+                    <button id="add-remark-btn" class="btn btn-warning mt-3" >Bemerkung hinzufügen</button>
                 {% else %}
                     <p>Bitte wählen Sie ein Ticket aus der Liste.</p>
                 {% endif %}
@@ -67,171 +68,244 @@
                     <button type="button" id="cancel-btn" class="btn btn-secondary w-100 mt-2">Abbrechen</button>
                 </form>
             </div>
+            <div id="remark-form-section" style="display: none;">
+                <h5>Neue Bemerkung hinzufügen</h5>
+                <form id="remark-form" method="POST" action="">
+                    {% csrf_token %}
+                    {{ remark_form.as_p }} <!-- Bemerkungsformular -->
+                    <button type="submit" class="btn btn-success">Speichern</button>
+                    <button type="button" class="btn btn-secondary" id="cancel-remark-btn">Abbrechen</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const currentUserId = document.getElementById('ticket-overview').getAttribute('data-user-id');
+    document.addEventListener('DOMContentLoaded', function() {
+        const addRemarkBtn = document.getElementById('add-remark-btn');
+        const remarkFormSection = document.getElementById('remark-form-section');
+        const ticketDetailSection = document.getElementById('ticket-detail');
+        const remarkForm = document.getElementById('remark-form');
+        const cancelRemarkBtn = document.getElementById('cancel-remark-btn');
 
-    // Funktion zum Filtern der Tickets
-    function filterTickets(showOnlyUserTickets) {
-        const searchText = document.getElementById('ticket-search').value.toLowerCase();
-
-        document.querySelectorAll('#ticket-list .list-group-item').forEach(ticket => {
-            const ticketId = ticket.getAttribute('data-ticket-id');
-            const title = ticket.getAttribute('data-title').toLowerCase();
-            const description = ticket.getAttribute('data-description').toLowerCase();
-            const assignedToId = ticket.getAttribute('data-assigned-to');
-            const createdById = ticket.getAttribute('data-created-by');
-
-            const matchesSearch = ticketId.includes(searchText) || title.includes(searchText) || description.includes(searchText);
-            const matchesUser = !showOnlyUserTickets || (assignedToId == currentUserId || createdById == currentUserId);
-
-            ticket.style.display = matchesSearch && matchesUser ? 'block' : 'none';
+        // Bemerkungsformular anzeigen
+        addRemarkBtn.addEventListener('click', function() {
+            if (selectedTicketId) {
+                remarkForm.action = `/add_remark/${selectedTicketId}/`; // Ticket-ID in das Action-Attribut setzen
+                ticketDetailSection.style.display = 'none';
+                remarkFormSection.style.display = 'block';
+            }
         });
-    }
 
-    // Event-Listener für Filter-Buttons
-    document.getElementById('show-all-tickets-btn').addEventListener('click', function() {
-        filterTickets(false);
-    });
-
-    document.getElementById('show-my-tickets-btn').addEventListener('click', function() {
-        filterTickets(true);
-    });
-
-    // Event-Listener für das Suchfeld
-    document.getElementById('ticket-search').addEventListener('input', function() {
-        filterTickets(document.getElementById('show-my-tickets-btn').classList.contains('active'));
-    });
-
-
-    // Event für das Erstellen eines neuen Tickets
-    document.getElementById('create-ticket-btn').addEventListener('click', function() {
-        document.getElementById('ticket-detail').style.display = 'none';
-        document.getElementById('ticket-form-section').style.display = 'block';
-        document.getElementById('ticket-form').action = "{% url 'ticket_overview' %}";
-        document.getElementById('form-title').innerText = "Neues Ticket erstellen";
-
-        // Leeren des Formulars für ein neues Ticket
-        document.querySelector('input[name="title"]').value = '';
-        document.querySelector('textarea[name="description"]').value = '';
-        document.querySelector('input[name="priority"]').value = '';
-        document.querySelector('select[name="module"]').value = '';
-        document.querySelector('select[name="category"]').value = '';
-        document.querySelectorAll('input[name="affected_materials"]').forEach(checkbox => {
-            checkbox.checked = false;
-        });
-    });
-
-    // Event für das Laden und Anzeigen der Ticket-Details
-    const ticketListItems = document.querySelectorAll('#ticket-list a');
-
-    ticketListItems.forEach(item => {
-        item.addEventListener('click', function(event) {
+        remarkForm.addEventListener('submit', function(event) {
             event.preventDefault();
-            const ticketId = this.getAttribute('data-ticket-id');
+            const formData = new FormData(remarkForm);
 
-            fetch(`/get_ticket/${ticketId}`)
-                .then(response => response.json())
-                .then(data => {
-                    // Details anzeigen
-                    let affectedMaterials = data.affected_materials.join(", ");
-                    let historyHtml = '<h5>Ticket-Historie</h5><ul>';
-                    data.history.forEach(entry => {
-                        historyHtml += `<li>${entry.datetime} - ${entry.user}: ${entry.text} (Status: ${entry.status})</li>`;
-                    });
-                    historyHtml += '</ul>';
-                    document.querySelector('#ticket-detail').innerHTML = `
-                        <h4><strong>Ticket #${data.id}: ${data.title}</strong></h4>
-                        <p><strong>Priorität:</strong> ${data.priority}</p>
-                        <p><strong>Status:</strong> ${data.status}</p>
-                        <p><strong>Modul:</strong> ${data.module}</p>
-                        <p><strong>Kategorie:</strong> ${data.category}</p>
-                        <p><strong>Betroffene Materialien:</strong> ${affectedMaterials}</p>
-                        <p><strong>Bearbeiter:</strong> ${data.assigned_to || ''}</p>
-                        <p><strong>Meldungstext:</strong> ${data.description}</p>
-                        <p><strong>Meldezeitpunkt:</strong> ${data.created_at}</p>
-                        ${historyHtml}
-                        <button id="edit-ticket-btn" class="btn btn-warning mt-3">Bearbeiten</button>
-                    `;
-                    document.getElementById('ticket-detail').style.display = 'block';
-                    document.getElementById('ticket-form-section').style.display = 'none';
+            fetch(remarkForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Erfolgreich gespeichert, also Bemerkungsliste neu laden
+                    ticketDetailSection.style.display = 'block';
+                    remarkFormSection.style.display = 'none';
+                    // Optional: Ticketdaten und Bemerkungsliste neu laden oder zur Ticketübersicht zurückkehren
+                    window.location.href = "{% url 'ticket_overview' %}";
+                } else {
+                    console.error('Fehler beim Speichern der Bemerkung:', data.errors);
+                }
+            })
+            .catch(error => console.error('Fehler beim Speichern der Bemerkung:', error));
+        });
 
-                    // Event für den Bearbeiten-Button nach dem Laden der Details neu setzen
-                    document.getElementById('edit-ticket-btn').addEventListener('click', function() {
-                        const selectedTicketId = data.id;
-                        if (selectedTicketId) {
-                            fetch(`/edit_ticket/${selectedTicketId}`)
-                                .then(response => response.json())
-                                .then(data => {
-                                    document.getElementById('ticket-detail').style.display = 'none';
-                                    document.getElementById('ticket-form-section').style.display = 'block';
-                                    document.getElementById('ticket-form').action = `/update_ticket/${selectedTicketId}/`;
-                                    document.getElementById('form-title').innerText = "Ticket bearbeiten";
+        // Abbrechen-Button für das Bemerkungsformular
+        cancelRemarkBtn.addEventListener('click', function() {
+            remarkFormSection.style.display = 'none';
+            ticketDetailSection.style.display = 'block';
+        });
 
-                                    // Formularfelder füllen
-                                    document.querySelector('input[name="title"]').value = data.title || '';
-                                    document.querySelector('textarea[name="description"]').value = data.description || '';
-                                    document.querySelector('input[name="priority"]').value = data.priority || '';
-                                    document.querySelector('select[name="module"]').value = data.module || '';
-                                    document.querySelector('select[name="category"]').value = data.category || '';
-                                    const materials = data.affected_materials || [];
-                                    document.querySelectorAll('input[name="affected_materials"]').forEach(checkbox => {
-                                        checkbox.checked = materials.includes(parseInt(checkbox.value));
-                                    });
-                                })
-                                .catch(error => console.error('Fehler beim Laden des Ticket-Bearbeitungsformulars:', error));
-                        }
-                    });
-                })
-                .catch(error => console.error('Fehler beim Laden der Ticket-Details:', error));
+        const currentUserId = document.getElementById('ticket-overview').getAttribute('data-user-id');
+        let selectedTicketId = null; // Globale Variable für die Ticket-ID
+
+        // Funktion zum Filtern der Tickets
+        function filterTickets(showOnlyUserTickets) {
+            const searchText = document.getElementById('ticket-search').value.toLowerCase();
+
+            document.querySelectorAll('#ticket-list .list-group-item').forEach(ticket => {
+                const ticketId = ticket.getAttribute('data-ticket-id');
+                const title = ticket.getAttribute('data-title').toLowerCase();
+                const description = ticket.getAttribute('data-description').toLowerCase();
+                const assignedToId = ticket.getAttribute('data-assigned-to');
+                const createdById = ticket.getAttribute('data-created-by');
+
+                const matchesSearch = ticketId.includes(searchText) || title.includes(searchText) || description.includes(searchText);
+                const matchesUser = !showOnlyUserTickets || (assignedToId == currentUserId || createdById == currentUserId);
+
+                ticket.style.display = matchesSearch && matchesUser ? 'block' : 'none';
+            });
+        }
+
+        document.getElementById('show-all-tickets-btn').addEventListener('click', function() {
+            filterTickets(false);
+        });
+
+        document.getElementById('show-my-tickets-btn').addEventListener('click', function() {
+            filterTickets(true);
+        });
+
+        document.getElementById('ticket-search').addEventListener('input', function() {
+            filterTickets(document.getElementById('show-my-tickets-btn').classList.contains('active'));
+        });
+
+        document.getElementById('create-ticket-btn').addEventListener('click', function() {
+            document.getElementById('ticket-detail').style.display = 'none';
+            document.getElementById('ticket-form-section').style.display = 'block';
+            document.getElementById('ticket-form').action = "{% url 'ticket_overview' %}";
+            document.getElementById('form-title').innerText = "Neues Ticket erstellen";
+
+            document.querySelector('input[name="title"]').value = '';
+            document.querySelector('textarea[name="description"]').value = '';
+            document.querySelector('input[name="priority"]').value = '';
+            document.querySelector('select[name="module"]').value = '';
+            document.querySelector('select[name="category"]').value = '';
+            document.querySelectorAll('input[name="affected_materials"]').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+        });
+
+        const ticketListItems = document.querySelectorAll('#ticket-list a');
+
+        ticketListItems.forEach(item => {
+            item.addEventListener('click', function(event) {
+                event.preventDefault();
+                selectedTicketId = this.getAttribute('data-ticket-id'); // Ticket-ID speichern
+
+                fetch(`/get_ticket/${selectedTicketId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        selectedTicketId = data.id; // Globale Variable aktualisieren
+
+                        let affectedMaterials = data.affected_materials.join(", ");
+                        let historyHtml = '<h5>Ticket-Historie</h5><ul>';
+                        data.history.forEach(entry => {
+                            historyHtml += `<li>${entry.datetime} - ${entry.user}: ${entry.text} (Status: ${entry.status})</li>`;
+                        });
+                        historyHtml += '</ul>';
+                        document.querySelector('#ticket-detail').innerHTML =
+                            `<h4><strong>Ticket #${data.id}: ${data.title}</strong></h4>
+                            <p><strong>Priorität:</strong> ${data.priority}</p>
+                            <p><strong>Status:</strong> ${data.status}</p>
+                            <p><strong>Modul:</strong> ${data.module}</p>
+                            <p><strong>Kategorie:</strong> ${data.category}</p>
+                            <p><strong>Betroffene Materialien:</strong> ${affectedMaterials}</p>
+                            <p><strong>Bearbeiter:</strong> ${data.assigned_to || ''}</p>
+                            <p><strong>Meldungstext:</strong> ${data.description}</p>
+                            <p><strong>Meldezeitpunkt:</strong> ${data.created_at}</p>
+                            ${historyHtml}
+                            <button id="edit-ticket-btn" class="btn btn-warning mt-3">Bearbeiten</button>
+                            <button id="add-remark-btn" class="btn btn-warning mt-3" >Bemerkung hinzufügen</button>`;
+
+                        document.getElementById('ticket-detail').style.display = 'block';
+                        document.getElementById('ticket-form-section').style.display = 'none';
+
+                        document.getElementById('edit-ticket-btn').addEventListener('click', function() {
+                            if (selectedTicketId) {
+                                fetch(`/edit_ticket/${selectedTicketId}`)
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        document.getElementById('ticket-detail').style.display = 'none';
+                                        document.getElementById('ticket-form-section').style.display = 'block';
+                                        document.getElementById('ticket-form').action = `/update_ticket/${selectedTicketId}/`;
+                                        document.getElementById('form-title').innerText = "Ticket bearbeiten";
+
+                                        document.querySelector('input[name="title"]').value = data.title || '';
+                                        document.querySelector('textarea[name="description"]').value = data.description || '';
+                                        document.querySelector('input[name="priority"]').value = data.priority || '';
+                                        document.querySelector('select[name="module"]').value = data.module || '';
+                                        document.querySelector('select[name="category"]').value = data.category || '';
+                                        const materials = data.affected_materials || [];
+                                        document.querySelectorAll('input[name="affected_materials"]').forEach(checkbox => {
+                                            checkbox.checked = materials.includes(parseInt(checkbox.value));
+                                        });
+                                    })
+                                    .catch(error => console.error('Fehler beim Laden des Ticket-Bearbeitungsformulars:', error));
+                            }
+                        });
+
+                        // Add Remark
+                        document.getElementById('add-remark-btn').addEventListener('click', function() {
+                            if (selectedTicketId) {
+                                fetch(`/add_remark/${selectedTicketId}`)
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        document.getElementById('ticket-detail').style.display = 'none';
+                                        document.getElementById('remark-form-section').style.display = 'block';
+                                        document.getElementById('remark-form-section').action = `/add_remark/${selectedTicketId}/`;
+                                        document.getElementById('form-title').innerText = "Bemerkung hinzufügen";
+
+                                        // document.querySelector('input[name="title"]').value = data.title || '';
+                                        // document.querySelector('textarea[name="description"]').value = data.description || '';
+                                        // document.querySelector('input[name="priority"]').value = data.priority || '';
+                                        // document.querySelector('select[name="module"]').value = data.module || '';
+                                        // document.querySelector('select[name="category"]').value = data.category || '';
+                                        // const materials = data.affected_materials || [];
+                                        // document.querySelectorAll('input[name="affected_materials"]').forEach(checkbox => {
+                                        //     checkbox.checked = materials.includes(parseInt(checkbox.value));
+                                        // });
+                                    })
+                                    .catch(error => console.error('Fehler beim Laden des Ticket-Bearbeitungsformulars:', error));
+                            }
+                        });
+
+                    })
+                    .catch(error => console.error('Fehler beim Laden der Ticket-Details:', error));
+            });
+        });
+
+        document.getElementById('cancel-btn').addEventListener('click', function() {
+            document.getElementById('ticket-form-section').style.display = 'none';
+            document.getElementById('ticket-detail').style.display = 'block';
+        });
+
+        document.getElementById('ticket-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const actionUrl = this.action;
+
+            if (!actionUrl.includes('update_ticket')) {
+                this.action = '/create_ticket/';
+            }
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('Netzwerkantwort war nicht ok.');
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    window.location.href = "{% url 'ticket_overview' %}";
+                } else {
+                    console.error('Fehler:', data.errors);
+                }
+            })
+            .catch(error => console.error('Fehler beim Speichern des Tickets:', error));
         });
     });
-
-    // Event zum Abbrechen des Formulars
-    document.getElementById('cancel-btn').addEventListener('click', function() {
-        document.getElementById('ticket-form-section').style.display = 'none';
-        document.getElementById('ticket-detail').style.display = 'block';
-    });
-
-    // Event zum Speichern des Formulars
-    document.getElementById('ticket-form').addEventListener('submit', function(event) {
-        event.preventDefault(); // Standardverhalten des Formulars verhindern
-        const formData = new FormData(this); // Formulardaten sammeln
-        console.log(this.action);
-        const actionUrl = this.action;
-        if (!actionUrl.includes('update_ticket')) {
-            // Beispiel: Die Action auf '/tickets/create/' ändern
-            this.action = '/create_ticket/';
-        }
-        fetch(this.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}', // CSRF-Token für Django
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => {
-            if (response.ok) {
-                return response.json();
-            }
-            throw new Error('Netzwerkantwort war nicht ok.');
-        })
-        .then(data => {
-            if (data.status === 'success') {
-            // Nach erfolgreichem Speichern zur Ticketübersicht weiterleiten
-            window.location.href = "{% url 'ticket_overview' %}";
-        } else {
-            console.error('Fehler:', data.errors);
-        }
-        })
-        .catch(error => console.error('Fehler beim Speichern des Tickets:', error));
-    });
-});
 </script>
 
 {% endblock %}
