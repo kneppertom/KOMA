@@ -23,7 +23,11 @@ class TicketForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['affected_materials'].queryset = AffectedMaterial.objects.all()
 
-class TicketHistoryForm(forms.ModelForm):
+class RemarkForm(forms.ModelForm):
     class Meta:
         model = TicketHistory
-        fields = ['text', 'status', 'user']  # Nur die Bemerkung und Status bearbeitbar
+        fields = ['text', 'status']  # Nur die Bemerkung und Status bearbeitbar
+        widgets = {
+            'text': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Geben Sie die Bemerkung ein'}),
+            'status': forms.Select(attrs={'class': 'form-select'}),
+        }

@@ -69,10 +69,10 @@
                 </form>
             </div>
             <div id="remark-form-section" style="display: none;">
-                <h5>Neue Bemerkung hinzufügen</h5>
-                <form id="remark-form" method="POST" action="">
+                <h5>Neue Bemerkung für Ticket #{{ selected_ticket.id }}: {{ selected_ticket.title }}</h5>
+                <form id="remark-form" method="POST" action="/add_remark/{{ selected_ticket.id }}/">
                     {% csrf_token %}
-                    {{ remark_form.as_p }} <!-- Bemerkungsformular -->
+                    {{ remark.as_p }} <!-- Bemerkungsformular -->
                     <button type="submit" class="btn btn-success">Speichern</button>
                     <button type="button" class="btn btn-secondary" id="cancel-remark-btn">Abbrechen</button>
                 </form>
@@ -89,19 +89,18 @@
         const remarkForm = document.getElementById('remark-form');
         const cancelRemarkBtn = document.getElementById('cancel-remark-btn');
 
-        // Bemerkungsformular anzeigen
-        addRemarkBtn.addEventListener('click', function() {
-            if (selectedTicketId) {
-                remarkForm.action = `/add_remark/${selectedTicketId}/`; // Ticket-ID in das Action-Attribut setzen
-                ticketDetailSection.style.display = 'none';
-                remarkFormSection.style.display = 'block';
-            }
-        });
+        // // Bemerkungsformular anzeigen
+        // addRemarkBtn.addEventListener('click', function() {
+        //     if (selectedTicketId) {
+        //         ticketDetailSection.style.display = 'none';
+        //         remarkFormSection.style.display = 'block';
+        //     }
+        // });
 
         remarkForm.addEventListener('submit', function(event) {
             event.preventDefault();
             const formData = new FormData(remarkForm);
-
+            remarkForm.action = `/add_remark/${selectedTicketId}/`;
             fetch(remarkForm.action, {
                 method: 'POST',
                 body: formData,
@@ -113,10 +112,6 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    // Erfolgreich gespeichert, also Bemerkungsliste neu laden
-                    ticketDetailSection.style.display = 'block';
-                    remarkFormSection.style.display = 'none';
-                    // Optional: Ticketdaten und Bemerkungsliste neu laden oder zur Ticketübersicht zurückkehren
                     window.location.href = "{% url 'ticket_overview' %}";
                 } else {
                     console.error('Fehler beim Speichern der Bemerkung:', data.errors);
@@ -191,7 +186,7 @@
                     .then(response => response.json())
                     .then(data => {
                         selectedTicketId = data.id; // Globale Variable aktualisieren
-
+                        document.getElementById('remark-form-section').style.display = 'none';
                         let affectedMaterials = data.affected_materials.join(", ");
                         let historyHtml = '<h5>Ticket-Historie</h5><ul>';
                         data.history.forEach(entry => {
@@ -214,6 +209,9 @@
 
                         document.getElementById('ticket-detail').style.display = 'block';
                         document.getElementById('ticket-form-section').style.display = 'none';
+                        // Aktualisiere die Überschrift des Bemerkungsformulars
+                        document.querySelector('#remark-form-section h5').innerHTML =
+                            `Neue Bemerkung für Ticket #${data.id}: ${data.title}`;
 
                         document.getElementById('edit-ticket-btn').addEventListener('click', function() {
                             if (selectedTicketId) {
@@ -242,23 +240,13 @@
                         // Add Remark
                         document.getElementById('add-remark-btn').addEventListener('click', function() {
                             if (selectedTicketId) {
-                                fetch(`/add_remark/${selectedTicketId}`)
+                                fetch(`/add_remark/${selectedTicketId}/`)
                                     .then(response => response.json())
                                     .then(data => {
                                         document.getElementById('ticket-detail').style.display = 'none';
                                         document.getElementById('remark-form-section').style.display = 'block';
                                         document.getElementById('remark-form-section').action = `/add_remark/${selectedTicketId}/`;
                                         document.getElementById('form-title').innerText = "Bemerkung hinzufügen";
-
-                                        // document.querySelector('input[name="title"]').value = data.title || '';
-                                        // document.querySelector('textarea[name="description"]').value = data.description || '';
-                                        // document.querySelector('input[name="priority"]').value = data.priority || '';
-                                        // document.querySelector('select[name="module"]').value = data.module || '';
-                                        // document.querySelector('select[name="category"]').value = data.category || '';
-                                        // const materials = data.affected_materials || [];
-                                        // document.querySelectorAll('input[name="affected_materials"]').forEach(checkbox => {
-                                        //     checkbox.checked = materials.includes(parseInt(checkbox.value));
-                                        // });
                                     })
                                     .catch(error => console.error('Fehler beim Laden des Ticket-Bearbeitungsformulars:', error));
                             }

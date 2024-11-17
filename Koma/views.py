@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import permission_required
 from .models import Ticket, TicketHistory
 from django.contrib.contenttypes.models import ContentType
-from .forms import TicketForm, TicketHistoryForm
+from .forms import TicketForm, RemarkForm
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 
@@ -92,6 +92,7 @@ def ticket_overview(request, ticket_id=None):
         'selected_ticket': selected_ticket,
         'history_entries': history_entries,
         'form': TicketForm(instance=selected_ticket),
+        'remark': RemarkForm(instance=selected_ticket),
     }
     return render(request, 'tickets/ticket_overview.html', context)
 
@@ -151,18 +152,6 @@ def edit_ticket(request, ticket_id):
         }
         return JsonResponse(data)
 
-# # View zum Erstellen eines neuen Tickets
-# def create_ticket(request):
-#     if request.method == 'POST':
-#         form = TicketForm(request.POST)
-#         if form.is_valid():
-#             form.save()
-#             return redirect(reverse('ticket_list'))  # Zurück zur Ticketliste oder zu einer anderen Zielseite
-#     else:
-#         form = TicketForm()
-#
-#     return render(request, 'tickets/ticket_form.html', {'form': form, 'action': 'Erstellen'})
-
 # View zum Erstellen eines neuen Tickets
 def create_ticket(request):
     if request.method == 'POST':
@@ -215,11 +204,16 @@ def add_remark(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
     if request.method == 'POST':
-        form = TicketHistoryForm(request.POST)
+        form = RemarkForm(request.POST)
         if form.is_valid():
             remark = form.save(commit=False)
             remark.ticket = ticket
             remark.user = request.user  # Angemeldeter Benutzer wird als User gesetzt
+            # Optional: Status des Tickets aktualisieren (Falls der Status im RemarkForm gesetzt wird)
+            if 'status' in form.cleaned_data:
+                new_status = form.cleaned_data['status']
+                ticket.status = new_status  # Ticketstatus aktualisieren
+                ticket.save()  # Ticket speichern
             remark.save()
             # Erfolgreiche JSON-Antwort
             return JsonResponse({'status': 'success', 'message': 'Bemerkung hinzugefügt'})
