@@ -6,8 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="91895775-5283-4797-80a9-992e7377349f" name="Changes" comment="Update">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Koma/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/Koma/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Koma/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/Koma/templates/base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Koma/templates/tickets/ticket_overview.html" beforeDir="false" afterPath="$PROJECT_DIR$/Koma/templates/tickets/ticket_overview.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,12 +37,12 @@
     &quot;assignee&quot;: &quot;kneppertom&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/kneppertom/KOMA.git",
-    "accountId": "484f9b7e-bbf1-48ad-b85b-e44067a98496"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/kneppertom/KOMA.git&quot;,
+    &quot;accountId&quot;: &quot;484f9b7e-bbf1-48ad-b85b-e44067a98496&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 2
 }</component>

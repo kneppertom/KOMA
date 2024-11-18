@@ -322,6 +322,23 @@
             .catch(error => console.error('Fehler beim Speichern des Tickets:', error));
         });
     });
+
+    // Für die Farbliche Hervorhebung des ausgewählten Tickets
+    document.addEventListener('DOMContentLoaded', function () {
+        const ticketListItems = document.querySelectorAll('#ticket-list .list-group-item');
+
+        ticketListItems.forEach(item => {
+            item.addEventListener('click', function () {
+                // Entferne die `selected`-Klasse von allen Elementen
+                ticketListItems.forEach(ticket => {
+                    ticket.classList.remove('selected');
+                });
+
+                // Füge die `selected`-Klasse zum angeklickten Element hinzu
+                this.classList.add('selected');
+            });
+        });
+    });
 </script>
 
 {% endblock %}
