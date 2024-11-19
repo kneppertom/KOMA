@@ -2,7 +2,7 @@
 {% extends "base.html" %}
 {% load custom_filters %}
 {% block content %}
-
+<p>{{ user_permissions }}</p>
 <div class="container mt-4">
     <h2>Benutzerverwaltung</h2>
     <a href="{% url 'home' %}" class="btn btn-secondary mb-3">Zurück zum Dashboard</a>

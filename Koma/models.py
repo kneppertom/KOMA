@@ -1,5 +1,22 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
+
+# Beispiel: Berechtigung prüfen oder erstellen
+content_type = ContentType.objects.get_for_model(User)
+
+# Ticket-Berechtigung
+ticket_permission, created = Permission.objects.get_or_create(
+    codename='can_manage_tickets',
+    defaults={'name': 'Kann Tickets verwalten', 'content_type': content_type},
+)
+
+# Statistik-Berechtigung
+statistics_permission, created = Permission.objects.get_or_create(
+    codename='can_view_statistics',
+    defaults={'name': 'Kann Statistiken ansehen', 'content_type': content_type},
+)
 
 class Ticket(models.Model):
     STATUS_CHOICES = [

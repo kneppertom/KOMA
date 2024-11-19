@@ -5,7 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="91895775-5283-4797-80a9-992e7377349f" name="Changes" comment="Update">
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_09_11_2024_17_11_[Changes]/db.sqlite3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_09_11_2024_17_11_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_09_11_2024_17_11__Changes_.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Koma/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/Koma/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Koma/templates/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/Koma/templates/home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Koma/templates/user-list/user_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/Koma/templates/user-list/user_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Koma/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/Koma/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -128,6 +137,7 @@
       <workItem from="1731408970985" duration="5146000" />
       <workItem from="1731486277216" duration="15073000" />
       <workItem from="1731665713124" duration="17589000" />
+      <workItem from="1732038591543" duration="5153000" />
     </task>
     <task id="LOCAL-00001" summary="Update">
       <option name="closed" value="true" />

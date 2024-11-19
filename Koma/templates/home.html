@@ -8,7 +8,7 @@
 
     <!-- Beispiel für ein Dashboard mit Karten -->
     <div class="row"> <!-- Row-Container für die Karten -->
-        {% if has_ticket_permission %}
+        {% if can_manage_tickets %}
         <div class="col-md-4">
             <div class="card">
                 <div class="card-header">Tickets</div>
@@ -20,7 +20,7 @@
             </div>
         </div>
         {% endif %}
-
+       {% if can_view_statistics %}
         <div class="col-md-4">
             <div class="card">
                 <div class="card-header">Datenanalyse</div>
@@ -31,7 +31,7 @@
                 </div>
             </div>
         </div>
-
+        {% endif %}
         <!--{% if has_userview_permission %}-->
         <div class="col-md-4">
             <div class="card">

@@ -20,9 +20,15 @@ def register(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
+            ticket_permission = Permission.objects.get(codename='can_manage_tickets')
+            user.user_permissions.add(ticket_permission)
             messages.success(request, f'Account created for {user.username}!')
             login(request, user)  # Benutzer direkt nach der Registrierung einloggen
-            return redirect('home')  # Weiterleitung zur Home-Seite nach der Registrierung
+            # return redirect('home')  # Weiterleitung zur Home-Seite nach der Registrierung
+            context = {
+                'can_manage_tickets': request.user.has_perm('auth.can_manage_tickets'),
+            }
+            return render(request, 'home.html', context)
     else:
         form = UserCreationForm()
     return render(request, 'register.html', {'form': form})
@@ -30,10 +36,12 @@ def register(request):
 @login_required
 def home(request):
     user = request.user
-    has_ticket_permission = user.has_perm('Ticketsystem.view_ticket')
+    # has_ticket_permission = user.has_perm('Ticketsystem.view_ticket')
     has_userview_permission = user.has_perm('Ticketsystem.view_ticket')
-    context = {'has_ticket_permission': has_ticket_permission, 'has_userview_permission': has_userview_permission}
-    print(f"has_settings_permission: {has_userview_permission}")  # Debug-Ausgabe
+    can_manage_tickets = user.has_perm('auth.can_manage_tickets')
+    can_view_statistics = user.has_perm('auth.can_view_statistics')
+    context = {'can_manage_tickets': can_manage_tickets, 'has_userview_permission': has_userview_permission, 'can_view_statistics': can_view_statistics}
+    # print(f"has_settings_permission: {has_userview_permission}")  # Debug-Ausgabe
     return render(request, 'home.html', context)
 
 def ticket_list(request):
