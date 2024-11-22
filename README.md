@@ -36,18 +36,18 @@ Diese Anleitung beschreibt die Installation und Inbetriebnahme des Prototyps "KO
 
 **Information**: In manchen Fällen kann es Vorkommen das der Befehl „**python**“ nicht funktioniert, hier kann als Alternative „**py**“ verwendet werden.
 
-1. **Pip installieren/upgraden**:
+1. **Pip-Datei ausführen**:
+	```python get-pip.py```
+	
+Dies installiert pip, falls es noch nicht vorhanden ist, und ermöglicht die Verwaltung und Installation von Python-Paketen.
+
+2. **Pip installieren/upgraden**:
 	```python -m ensurepip --upgrade```
 	
 Dieser Befehl stellt sicher, dass pip (Python-Paketmanager) installiert oder aktualisiert wird, wodurch die Installation von Python-Paketen ermöglicht wird.
 
-2. **Pip-Datei ausführen**:
-```python get-pip.py```
-	
-Dies installiert pip, falls es noch nicht vorhanden ist, und ermöglicht die Verwaltung und Installation von Python-Paketen.
-
 3. **Django-Framework installieren**:
-```python -m pip install Django```
+	```python -m pip install Django```
 
 Dieser Befehl installiert das Django-Framework, das für die Entwicklung und den Betrieb des Projekts erforderlich ist.
 
