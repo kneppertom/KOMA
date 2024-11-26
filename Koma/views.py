@@ -14,6 +14,7 @@ from django.contrib.contenttypes.models import ContentType
 from .forms import TicketForm, RemarkForm
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
+from django.db.models import Q
 
 def register(request):
     if request.method == 'POST':
@@ -51,7 +52,21 @@ def ticket_list(request):
 @login_required
 #@permission_required('Ticketsystem.change_settings', raise_exception=True)
 def user_list(request):
-    users = User.objects.all()
+    # Hole den Suchbegriff aus den GET-Parametern
+    search_query = request.GET.get('search', '').strip()
+
+    # Filtere die Benutzer basierend auf dem Suchbegriff (Benutzername, Vorname oder Nachname)
+    if search_query:
+        users = User.objects.filter(
+            Q(username__icontains=search_query) |
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query)
+        )
+    else:
+        # Wenn kein Suchbegriff eingegeben wurde, zeige alle Benutzer an
+        users = User.objects.all()
+
+    # Alle Berechtigungen abrufen
     all_permissions = Permission.objects.all()
 
     # Wenn das Formular gesendet wird
@@ -79,10 +94,11 @@ def user_list(request):
             'permissions': permissions,
         })
 
-    # Übergib alle Berechtigungen und Benutzerdaten an das Template
+    # Übergib alle Berechtigungen, Benutzerdaten und den Suchbegriff an das Template
     context = {
         'user_permissions': user_permissions,
-        'all_permissions': all_permissions
+        'all_permissions': all_permissions,
+        'search_query': search_query  # Suchbegriff für die Vorlage
     }
     return render(request, 'user-list/user_list.html', context)
 
@@ -124,6 +140,7 @@ def get_ticket(request, ticket_id):
             'id': ticket.id,
             'title': ticket.title,
             'priority': ticket.priority,
+            'assigned_to': "",
             'status': ticket.status,
             'module': ticket.module.name if ticket.module else None,
             'category': ticket.category if ticket.category else None,
@@ -167,6 +184,7 @@ def create_ticket(request):
         if form.is_valid():
             ticket = form.save(commit=False)
             ticket.created_by = request.user
+            ticket.status = "RECEIVED"
             ticket = form.save()
             # Wenn der Request über AJAX kommt, JSON-Antwort zurückgeben
             if request.headers.get('x-requested-with') == 'XMLHttpRequest':

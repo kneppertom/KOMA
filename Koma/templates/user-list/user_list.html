@@ -2,34 +2,39 @@
 {% extends "base.html" %}
 {% load custom_filters %}
 {% block content %}
-<p>{{ user_permissions }}</p>
+
 <div class="container mt-4">
-    <h2>Benutzerverwaltung</h2>
-    <a href="{% url 'home' %}" class="btn btn-secondary mb-3">Zurück zum Dashboard</a>
+    <!-- Flexbox-Container für "Zurück"-Button und Suchformular -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <!-- "Zurück zum Dashboard"-Button -->
+        <a href="{% url 'home' %}" class="btn btn-secondary">Zurück zum Dashboard</a>
+
+        <!-- Suchformular -->
+        <form method="get" class="d-flex">
+            <input type="text" name="search" class="form-control me-2" placeholder="Benutzer suchen..." value="{{ search_query }}">
+            <button type="submit" class="btn btn-primary">Suchen</button>
+        </form>
+    </div>
+
+    <!-- Benutzerliste -->
     <div class="row">
         <div class="col-md-4">
             <div class="list-group">
-                <!-- User-Auswahl mit Click-Event, das die ID speichert -->
                 {% for user_data in user_permissions %}
-                <a href="?selected_user={{ user_data.user.id }}" class="list-group-item list-group-item-action {% if request.GET.selected_user|stringformat:"s" == user_data.user.id|stringformat:"s" %}list-group-item-secondary{% endif %}">
+                <a href="?selected_user={{ user_data.user.id }}&search={{ request.GET.search }}" class="list-group-item list-group-item-action {% if request.GET.selected_user|stringformat:"s" == user_data.user.id|stringformat:"s" %}list-group-item-secondary{% endif %}">
                     <h4>{{ user_data.user.username }}</h4>
 
-                    <!-- Container für Badges -->
                     <div class="position-absolute top-0 end-0 d-flex align-items-center">
-                        <!-- Anzeige für den Administrator- oder Staff-Status -->
                         {% if user_data.user.is_superuser %}
                             <span class="badge bg-danger">Administrator</span>
                         {% elif user_data.user.is_staff %}
                             <span class="badge bg-primary">Team</span>
                         {% endif %}
-
-                        <!-- Anzeige für deaktivierte Benutzer (immer ganz rechts) -->
                         {% if not user_data.user.is_active %}
                             <span class="badge bg-secondary">Deaktiviert</span>
                         {% endif %}
                     </div>
 
-                    <!-- Zusätzliche Informationen für den ausgewählten Benutzer -->
                     {% if request.GET.selected_user|stringformat:"s" == user_data.user.id|stringformat:"s" %}
                         <div class="mt-2">
                             <p class="mb-1"><strong>Name:</strong> {{ user_data.user.first_name }} {{ user_data.user.last_name }}</p>
@@ -38,11 +43,12 @@
                         </div>
                     {% endif %}
                 </a>
+                {% empty %}
+                <p class="text-muted">Keine Benutzer gefunden.</p>
                 {% endfor %}
             </div>
         </div>
         <div class="col-md-8">
-            <!-- Abrufen der ausgewählten User-ID aus der URL -->
             {% if request.GET.selected_user %}
             {% with selected_user=request.GET.selected_user %}
             {% for user_data in user_permissions %}
@@ -57,7 +63,7 @@
                                 <div class="col-12 col-md-4 mb-1">
                                     <div class="form-check">
                                         <input type="checkbox" class="form-check-input" name="permissions_{{ user_data.user.id }}" value="{{ permission.id }}"
-                                               {% if user_data.permissions|matches_suffix:permission.codename %}checked{% endif %}
+                                               {% if user_data.permissions|matches_suffix:permission.codename %}checked{% endif %}>
                                         <label class="form-check-label">{{ permission.name }}</label>
                                     </div>
                                 </div>
@@ -68,13 +74,12 @@
                 <button type="submit" class="btn btn-primary" name="save_user" value="{{ user_data.user.id }}">Speichern</button>
                 <button type="submit" class="btn btn-warning" name="reset_password" value="{{ user_data.user.id }}">Passwort zurücksetzen</button>
                 <button type="submit" class="btn btn-danger" name="delete_user" value="{{ user_data.user.id }}">User löschen</button>
-
             </form>
             {% endif %}
             {% endfor %}
             {% endwith %}
             {% else %}
-            <br><br><br><p>Einen Benutzer auswählen, um mehr Informationen zu sehen.</p>
+            <p>Einen Benutzer auswählen, um mehr Informationen zu sehen.</p>
             {% endif %}
         </div>
     </div>

@@ -5,13 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="91895775-5283-4797-80a9-992e7377349f" name="Changes" comment="Update">
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_09_11_2024_17_11_[Changes]/db.sqlite3" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_09_11_2024_17_11_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_09_11_2024_17_11__Changes_.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Koma/test_integration.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Koma/test_models.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Koma/test_views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Koma/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/Koma/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Koma/templates/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/Koma/templates/home.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Koma/templates/user-list/user_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/Koma/templates/user-list/user_list.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Koma/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/Koma/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
@@ -62,32 +59,33 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
-    &quot;JavaScript Debug.index.html.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/KnepperTom/PycharmProjects/Koma/Koma/templates&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;project.propDebugger&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
+    "JavaScript Debug.index.html.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "C:/Users/Benny/Downloads/OneDrive_1_26.11.2024/test_integration.py",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "project.propDebugger",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\KnepperTom\PycharmProjects\Koma\Koma\templates" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Benny\Documents\GitHub\KOMA\Koma" />
+      <recent name="C:\Users\Benny\Documents\GitHub\KOMA\Koma\templates" />
       <recent name="C:\Users\Benny\Documents\GitHub\KOMA\Koma\templatetags" />
       <recent name="C:\Users\KnepperTom\PycharmProjects\Koma\Koma\templates\tickets" />
       <recent name="C:\Users\KnepperTom\PycharmProjects\Koma\Koma" />
-      <recent name="C:\Users\KnepperTom\PycharmProjects\Koma\Koma\templates\tickets\create" />
     </key>
   </component>
   <component name="SharedIndexes">
